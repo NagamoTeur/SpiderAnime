@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="dark" lang="fr">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AniGraph - Découvrez votre prochain univers</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&family=Inter:wght@400;500;600&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <!-- Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <!-- D3.js Force & Graph Library -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+
+    <!-- Tailwind Configuration -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#4cd7f6",
+                        "error-container": "#93000a",
+                        "surface-tint": "#d0bcff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-container": "#03b5d3",
+                        "on-surface": "#dae2fd",
+                        "inverse-primary": "#6d3bd7",
+                        "on-background": "#dae2fd",
+                        "on-secondary": "#003640",
+                        "inverse-on-surface": "#283044",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "tertiary-container": "#00a572",
+                        "on-primary": "#3c0091",
+                        "on-error": "#690005",
+                        "surface-container": "#171f33",
+                        "secondary-fixed": "#acedff",
+                        "inverse-surface": "#dae2fd",
+                        "outline-variant": "#494454",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "outline": "#958ea0",
+                        "surface-variant": "#2d3449",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#23005c",
+                        "on-primary-container": "#340080",
+                        "on-secondary-fixed": "#001f26",
+                        "surface-container-high": "#222a3d",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed": "#002113",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary": "#4edea3",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container-highest": "#2d3449",
+                        "on-secondary-container": "#00424e",
+                        "primary": "#d0bcff",
+                        "on-tertiary": "#003824",
+                        "surface-bright": "#31394d",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface": "#0b1326",
+                        "primary-fixed": "#e9ddff",
+                        "background": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "surface-dim": "#0b1326",
+                        "primary-container": "#a078ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "unit": "4px",
+                        "max-width": "1440px",
+                        "margin-mobile": "16px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Sora", "sans-serif"],
+                        "label-mono": ["Geist", "monospace"],
+                        "label-caps": ["Geist", "monospace"],
+                        "headline-md": ["Sora", "sans-serif"],
+                        "headline-lg": ["Sora", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "headline-lg-mobile": ["Sora", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="./src/style.css"/>
+</head>
+<body class="bg-background text-on-background min-h-screen overflow-hidden flex flex-col font-body-md selection:bg-primary/30">
+
+    <!-- Global Background Shader -->
+    <div class="fixed inset-0 z-0 pointer-events-none opacity-40">
+        <canvas id="shader-canvas" class="w-full h-full block"></canvas>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3.5 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_20px_rgba(208,188,255,0.1)]">
+        <div class="flex items-center gap-8">
+            <div class="flex items-center gap-3 cursor-pointer" id="brand-logo">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-secondary p-0.5 shadow-[0_0_15px_rgba(208,188,255,0.4)]">
+                    <div class="w-full h-full bg-surface-container-lowest rounded-[10px] flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-[22px]">hub</span>
+                    </div>
+                </div>
+                <div>
+                    <span class="font-display-lg text-2xl font-bold bg-gradient-to-r from-primary via-secondary to-tertiary bg-clip-text text-transparent tracking-tight">AniGraph</span>
+                    <span class="font-label-mono text-[10px] text-outline block -mt-1 tracking-widest uppercase opacity-70">Spider Discovery Network</span>
+                </div>
+            </div>
+
+            <!-- View Switch Tabs -->
+            <div class="hidden md:flex gap-2 bg-surface-container/60 p-1 rounded-xl border border-outline-variant/30">
+                <button id="nav-btn-graph" class="px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-primary/20 text-primary border border-primary/40 shadow-[0_0_10px_rgba(208,188,255,0.2)]">
+                    <span class="material-symbols-outlined text-[18px]">polyline</span>
+                    <span>Toile d'Araignée</span>
+                </button>
+                <button id="nav-btn-discover" class="px-4 py-1.5 rounded-lg text-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-300 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">explore</span>
+                    <span>Découverte</span>
+                </button>
+                <button id="nav-btn-trending" class="px-4 py-1.5 rounded-lg text-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all duration-300 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">local_fire_department</span>
+                    <span>Tendances</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Action Items -->
+        <div class="flex items-center gap-3">
+            <!-- CMD+K Search Trigger -->
+            <button id="btn-open-search" class="flex items-center bg-surface-container/70 border border-outline-variant/40 hover:border-primary/50 rounded-xl px-4 py-2 cursor-pointer hover:bg-white/5 transition-all duration-300 group shadow-sm">
+                <span class="material-symbols-outlined text-outline group-hover:text-primary text-[20px] mr-2.5 transition-colors">search</span>
+                <span class="font-label-mono text-xs text-outline group-hover:text-on-surface mr-6 transition-colors">Chercher un animé...</span>
+                <kbd class="font-label-mono text-[10px] bg-surface-variant/80 text-on-surface-variant px-2 py-0.5 rounded border border-outline-variant/60 shadow-inner">CTRL + K</kbd>
+            </button>
+
+            <!-- Favorites Count Badge -->
+            <div id="stats-badge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-container/60 border border-outline-variant/30 text-xs font-label-mono">
+                <span class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></span>
+                <span class="text-outline">Nœuds:</span>
+                <span id="stat-node-count" class="text-primary font-bold">0</span>
+            </div>
+
+            <!-- User Profile Account Button -->
+            <button id="btn-user-account" class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/5 transition-all text-primary">
+                <div class="p-2 rounded-full hover:bg-white/5 transition-all text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[24px]">account_circle</span>
+                    <span class="hidden sm:inline text-xs font-label-mono text-outline">Connexion</span>
+                </div>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 pt-[64px] relative z-10 w-full h-[calc(100vh-64px)] overflow-hidden">
+        
+        <!-- View 1: Spider Web Graph Canvas (Full Edge-to-Edge Canvas) -->
+        <div id="view-graph" class="absolute inset-0 w-full h-full transition-opacity duration-300 opacity-100 pointer-events-auto">
+            <canvas id="graph-canvas" class="w-full h-full cursor-grab active:cursor-grabbing block"></canvas>
+
+            <div class="absolute bottom-6 left-6 z-20 flex flex-col gap-2 bg-surface-container/80 backdrop-blur-xl p-2 rounded-2xl border border-outline-variant/40 shadow-2xl">
+                <div class="flex items-center gap-1">
+                    <button id="ctrl-zoom-in" title="Zoom avant" class="p-2 rounded-xl text-on-surface-variant hover:text-primary hover:bg-white/10 transition-all">
+                        <span class="material-symbols-outlined text-[20px]">add</span>
+                    </button>
+                    <button id="ctrl-zoom-out" title="Zoom arrière" class="p-2 rounded-xl text-on-surface-variant hover:text-primary hover:bg-white/10 transition-all">
+                        <span class="material-symbols-outlined text-[20px]">remove</span>
+                    </button>
+                    <button id="ctrl-reset-view" title="Recentrer la vue" class="p-2 rounded-xl text-on-surface-variant hover:text-primary hover:bg-white/10 transition-all">
+                        <span class="material-symbols-outlined text-[20px]">center_focus_strong</span>
+                    </button>
+                    <div class="w-px h-6 bg-outline-variant/40 mx-1"></div>
+                    <button id="ctrl-toggle-physics" title="Activer/Désactiver la Physique" class="px-3 py-1.5 rounded-xl text-xs font-label-mono text-secondary bg-secondary/10 border border-secondary/30 hover:bg-secondary/20 transition-all flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[16px]">motion_photos_on</span>
+                        <span id="physics-label">Physique</span>
+                    </button>
+                    <button id="ctrl-clear-graph" title="Réinitialiser le graphe" class="p-2 rounded-xl text-outline hover:text-error hover:bg-error/10 transition-all">
+                        <span class="material-symbols-outlined text-[20px]">delete_sweep</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="absolute top-4 left-6 z-20 hidden lg:flex items-center gap-3 px-4 py-2 rounded-xl bg-surface-container/70 backdrop-blur-md border border-outline-variant/30 text-xs text-outline">
+                <span class="material-symbols-outlined text-secondary text-[18px]">gesture</span>
+                <span>Déplacez les cartes | Molette pour Zoomer | Cliquez sur (+) Tisser pour déployer la toile</span>
+            </div>
+        </div>
+
+        <!-- View 2: Discovery Grid View -->
+        <div id="view-discovery" class="absolute inset-0 w-full h-full overflow-y-auto pt-24 md:pt-28 pb-20 px-6 md:px-10 transition-opacity duration-300 opacity-0 pointer-events-none bg-surface/90 backdrop-blur-md custom-scrollbar">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-outline-variant/30 pb-6">
+                    <div>
+                        <h1 class="font-display-lg text-3xl md:text-4xl font-bold text-on-surface tracking-tight">Catalogue & Découverte Anime</h1>
+                        <p class="text-on-surface-variant text-sm mt-1.5">Explorez les animés populaires du moment et ajoutez-les directement à votre toile d'araignée.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2" id="discovery-genres-filter">
+                        <button class="genre-tag-btn active px-3 py-1.5 rounded-xl text-xs font-label-mono bg-primary text-on-primary font-bold shadow-[0_0_10px_rgba(208,188,255,0.3)]">Tous</button>
+                        <button class="genre-tag-btn px-3 py-1.5 rounded-xl text-xs font-label-mono bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:border-primary/40 transition-all" data-genre="Action">Action</button>
+                        <button class="genre-tag-btn px-3 py-1.5 rounded-xl text-xs font-label-mono bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:border-primary/40 transition-all" data-genre="Sci-Fi">Sci-Fi</button>
+                        <button class="genre-tag-btn px-3 py-1.5 rounded-xl text-xs font-label-mono bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:border-primary/40 transition-all" data-genre="Fantasy">Fantasy</button>
+                        <button class="genre-tag-btn px-3 py-1.5 rounded-xl text-xs font-label-mono bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface hover:border-primary/40 transition-all" data-genre="Romance">Romance</button>
+                    </div>
+                </div>
+
+                <div id="discovery-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+                    <!-- Dynamic anime cards -->
+                </div>
+            </div>
+        </div>
+
+        <!-- View 3: Trending Top 10 View -->
+        <div id="view-trending" class="absolute inset-0 w-full h-full overflow-y-auto pt-24 md:pt-28 pb-20 px-6 md:px-10 transition-opacity duration-300 opacity-0 pointer-events-none bg-surface/90 backdrop-blur-md custom-scrollbar">
+            <!-- Dynamic Trending Content rendered by TrendingView.js -->
+        </div>
+
+        <!-- Slide-over Anime Detail Sidebar -->
+        <aside id="detail-sidebar" class="fixed right-0 top-[64px] bottom-0 w-full sm:w-[450px] z-40 bg-surface-container/90 backdrop-blur-2xl border-l border-outline-variant/30 shadow-[ -10px_0_30px_rgba(0,0,0,0.5)] transform translate-x-full transition-transform duration-300 ease-out flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-outline-variant/30 flex items-center justify-between bg-surface-container-high/40">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">info</span>
+                    <span class="font-headline-md text-base font-semibold text-on-surface">Détails de l'Animé</span>
+                </div>
+                <button id="btn-close-sidebar" class="p-1.5 rounded-xl hover:bg-white/10 text-outline hover:text-on-surface transition-all">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div id="sidebar-content" class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+                <!-- Content injected dynamically -->
+            </div>
+        </aside>
+
+        <!-- Search Modal Overlay (CMD + K) -->
+        <div id="search-modal" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xl flex items-start justify-center pt-16 px-4 opacity-0 pointer-events-none transition-opacity duration-200">
+            <div class="w-full max-w-2xl bg-surface-container/95 border border-outline-variant/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] transform scale-95 transition-transform duration-200" id="search-modal-container">
+                <div class="p-4 border-b border-outline-variant/40 flex items-center gap-3 bg-surface-container-high/40">
+                    <span class="material-symbols-outlined text-primary text-[24px]">search</span>
+                    <input type="text" id="search-input" placeholder="Rechercher un animé (ex: Oshi no Ko, Naruto, Solo Leveling, Steins;Gate)..." class="flex-1 bg-transparent border-none text-on-surface placeholder:text-outline/70 focus:outline-none font-body-lg text-lg"/>
+                    <span id="search-spinner" class="hidden material-symbols-outlined text-secondary animate-spin">progress_activity</span>
+                    <button id="btn-close-search" class="p-1.5 rounded-xl hover:bg-white/10 text-outline hover:text-on-surface transition-all text-xs font-label-mono bg-surface-variant/50 px-2 py-1">
+                        ESC
+                    </button>
+                </div>
+
+                <div id="search-results-list" class="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                    <div class="text-center py-12 text-outline font-label-mono text-sm">
+                        <span class="material-symbols-outlined text-3xl mb-2 block opacity-40">manage_search</span>
+                        Saisissez au moins 2 caractères (ex: Oshi no Ko, Naruto, Solo Leveling)...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+</body>
+</html>

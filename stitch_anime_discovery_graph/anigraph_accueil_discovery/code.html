@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AniGraph - Découvrez votre prochain univers</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600&amp;family=Inter:wght@400&amp;family=Sora:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#4cd7f6",
+                        "error-container": "#93000a",
+                        "surface-tint": "#d0bcff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-container": "#03b5d3",
+                        "on-surface": "#dae2fd",
+                        "inverse-primary": "#6d3bd7",
+                        "on-background": "#dae2fd",
+                        "on-secondary": "#003640",
+                        "inverse-on-surface": "#283044",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "tertiary-container": "#00a572",
+                        "on-primary": "#3c0091",
+                        "on-error": "#690005",
+                        "surface-container": "#171f33",
+                        "secondary-fixed": "#acedff",
+                        "inverse-surface": "#dae2fd",
+                        "outline-variant": "#494454",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "outline": "#958ea0",
+                        "surface-variant": "#2d3449",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#23005c",
+                        "on-primary-container": "#340080",
+                        "on-secondary-fixed": "#001f26",
+                        "surface-container-high": "#222a3d",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed": "#002113",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary": "#4edea3",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container-highest": "#2d3449",
+                        "on-secondary-container": "#00424e",
+                        "primary": "#d0bcff",
+                        "on-tertiary": "#003824",
+                        "surface-bright": "#31394d",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface": "#0b1326",
+                        "primary-fixed": "#e9ddff",
+                        "background": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "surface-dim": "#0b1326",
+                        "primary-container": "#a078ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "unit": "4px",
+                        "max-width": "1440px",
+                        "margin-mobile": "16px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Sora"],
+                        "label-mono": ["Geist"],
+                        "label-caps": ["Geist"],
+                        "headline-md": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Sora"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "display-lg": ["48px", { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "label-mono": ["14px", { lineHeight: "1.4", fontWeight: "400" }],
+                        "label-caps": ["12px", { lineHeight: "1", letterSpacing: "0.1em", fontWeight: "600" }],
+                        "headline-md": ["24px", { lineHeight: "1.3", fontWeight: "500" }],
+                        "headline-lg": ["32px", { lineHeight: "1.2", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "headline-lg-mobile": ["24px", { lineHeight: "1.2", fontWeight: "600" }],
+                        "body-md": ["16px", { lineHeight: "1.5", fontWeight: "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom scrollbar for terminal feel */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0b1326; }
+        ::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #494454; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md antialiased selection:bg-primary-container selection:text-on-primary-container overflow-x-hidden">
+<!-- Global Full-Bleed WebGL Shader Background -->
+<!-- STITCH_SHADER_START:ANIMATION_4 class="fixed inset-0 w-full h-full z-[-10] opacity-80" -->
+<div class="fixed inset-0 w-full h-full z-[-10] opacity-80" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_4" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_4');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    
+    // Cyberpunk color palette from design system
+    vec3 color1 = vec3(0.04, 0.07, 0.15); // Deep slate/navy (Background)
+    vec3 color2 = vec3(0.54, 0.36, 0.96); // Neon Violet
+    vec3 color3 = vec3(0.02, 0.71, 0.83); // Cyan
+    
+    float n = noise(uv * 4.0 + u_time * 0.2);
+    n += 0.5 * noise(uv * 8.0 - u_time * 0.1);
+    
+    float distToMouse = length(uv - mouse);
+    float glow = exp(-distToMouse * 4.0);
+    
+    vec3 finalColor = mix(color1, color2, n * 0.3);
+    finalColor = mix(finalColor, color3, glow * 0.2);
+    
+    // Add subtle grid or "neural" network pulse
+    float grid = sin(uv.x * 40.0 + u_time) * sin(uv.y * 40.0 + u_time);
+    finalColor += color3 * clamp(grid, 0.0, 1.0) * 0.02;
+    
+    gl_FragColor = vec4(finalColor, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_4 -->
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-gutter py-4 bg-surface/70 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_4px_20px_rgba(208,188,255,0.1)]">
+<div class="flex items-center gap-3">
+<img alt="AniGraph Brand Icon" class="h-10 w-10 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW6HTXCossqm7osc2HBJ_rgoZAfxEc9pwe_IRXyuPTmAt90p3kXOtoEGFylgz6-KkE3JUHj8OHqNaMI_vos8hFF4b0rzeVWbY5Cy7X_6AYK2-llI0zj-AVP6wdt4TWGGoyYAb7r3TwG-EW7i4vaYTZRx0uQnFCeHDPv58x3tMHWoVt9JGBzqCcQcBpiz71Ifbvf9tRtEXGxaTUgXss1c857M8hzjsRwqQHQ8nK2QGd_iotaG8uqBjdeA"/>
+<span class="font-display-lg text-display-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent !text-[24px]">AniGraph</span>
+</div>
+<div class="hidden md:flex gap-8 items-center">
+<!-- Active Navigation Item (Discover context) -->
+<a class="text-primary border-b-2 border-primary font-bold font-headline-md text-[16px] hover:bg-white/5 transition-all duration-300 scale-95 transition-transform flex flex-col py-1" href="#">Discover</a>
+<!-- Inactive Navigation Items -->
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-headline-md text-[16px] hover:bg-white/5 transition-all duration-300 py-1" href="#">Graph</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-headline-md text-[16px] hover:bg-white/5 transition-all duration-300 py-1" href="#">Trending</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors font-headline-md text-[16px] hover:bg-white/5 transition-all duration-300 py-1" href="#">Seasonal</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-primary transition-colors hover:bg-white/5 p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">account_circle</span>
+</button>
+</div>
+</nav>
+<!-- App Layout Container -->
+<div class="flex min-h-screen pt-[72px]">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col fixed left-0 top-0 h-full z-40 pt-24 pb-8 w-64 bg-surface-container/80 backdrop-blur-2xl border-r border-outline-variant/20 shadow-xl">
+<!-- Header section matching JSON context -->
+<div class="px-6 mb-8 flex flex-col gap-1">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center border border-outline-variant/50">
+<span class="material-symbols-outlined text-secondary text-sm">terminal</span>
+</div>
+<div>
+<p class="font-label-mono text-label-mono text-secondary">Terminal Session</p>
+<p class="font-label-mono text-[10px] text-on-surface-variant">User_01_Active</p>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-2">
+<!-- Assume 'My Graph' is default selected for terminal session view -->
+<a class="flex items-center gap-4 bg-primary/20 text-primary border-r-4 border-primary px-4 py-3 hover:text-tertiary transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+<span class="font-label-mono text-label-mono">My Graph</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-tertiary transition-all hover:translate-x-1 duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-secondary transition-colors">favorite</span>
+<span class="font-label-mono text-label-mono">Favorites</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-tertiary transition-all hover:translate-x-1 duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-secondary transition-colors">history</span>
+<span class="font-label-mono text-label-mono">History</span>
+</a>
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-tertiary transition-all hover:translate-x-1 duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-secondary transition-colors">settings</span>
+<span class="font-label-mono text-label-mono">Settings</span>
+</a>
+</div>
+<div class="px-6 mb-4 mt-auto">
+<button class="w-full py-2 border border-secondary/50 rounded-sm text-secondary font-label-mono text-[11px] hover:bg-secondary/10 transition-colors uppercase tracking-widest backdrop-blur-sm shadow-[0_0_10px_rgba(76,215,246,0.1)]">Expand Graph</button>
+</div>
+<div class="mt-4 border-t border-outline-variant/20 pt-4">
+<a class="flex items-center gap-4 text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-error transition-all hover:translate-x-1 duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-error transition-colors">logout</span>
+<span class="font-label-mono text-label-mono">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Canvas Content -->
+<main class="flex-1 md:ml-64 relative min-h-screen flex flex-col">
+<!-- Hero Section with 3D Graph -->
+<section class="relative w-full h-[65vh] flex flex-col items-center justify-center px-gutter border-b border-outline-variant/20 overflow-hidden">
+<!-- 3D Neural Network Background embedded strictly via threejs-scene tag -->
+<!-- STITCH_THREEJS_START:ANIMATION_5 class="absolute inset-0 w-full h-full z-0 mix-blend-screen opacity-70 pointer-events-none" -->
+<div class="absolute inset-0 w-full h-full z-0 mix-blend-screen opacity-70 pointer-events-none" style="display:block;">
+<script src="https://ajax.googleapis.com/ajax/libs/threejs/r125/three.min.js"></script>
+<div id="threejs-container-ANIMATION_5" style="width:100%;height:100%"></div>
+<script>
+(function() {
+  const container = document.getElementById('threejs-container-ANIMATION_5');
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  const width = container.clientWidth || window.innerWidth;
+const height = container.clientHeight || window.innerHeight;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+renderer.setSize(width, height);
+renderer.setPixelRatio(window.device_pixel_ratio || 1);
+container.appendChild(renderer.domElement);
+
+const nodes = [];
+const lines = [];
+const nodeCount = 12;
+const connections = [];
+
+const geometry = new THREE.SphereGeometry(0.1, 16, 16);
+const nodeMaterial = new THREE.MeshBasicMaterial({ color: 0x8b5cf6 }); // Neon Violet
+const cyanMaterial = new THREE.MeshBasicMaterial({ color: 0x06b6d4 }); // Cyan
+
+// Create nodes
+for (let i = 0; i < nodeCount; i++) {
+    const node = new THREE.Mesh(geometry, i % 3 === 0 ? cyanMaterial : nodeMaterial);
+    node.position.set(
+        (Math.random() - 0.5) * 8,
+        (Math.random() - 0.5) * 8,
+        (Math.random() - 0.5) * 4
+    );
+    node.velocity = new THREE.Vector3(
+        (Math.random() - 0.5) * 0.01,
+        (Math.random() - 0.5) * 0.01,
+        (Math.random() - 0.5) * 0.01
+    );
+    scene.add(node);
+    nodes.push(node);
+}
+
+// Create lines (dynamic)
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0x31394d, transparent: true, opacity: 0.3 });
+
+function updateLines() {
+    // Remove old lines
+    lines.forEach(l => scene.remove(l));
+    lines.length = 0;
+
+    for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+            const dist = nodes[i].position.distanceTo(nodes[j].position);
+            if (dist < 4) {
+                const points = [nodes[i].position, nodes[j].position];
+                const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
+                const line = new THREE.Line(lineGeo, lineMaterial);
+                scene.add(line);
+                lines.push(line);
+            }
+        }
+    }
+}
+
+camera.position.z = 8;
+
+function animate() {
+    requestAnimationFrame(animate);
+    
+    nodes.forEach(node => {
+        node.position.add(node.velocity);
+        
+        // Bounce off boundaries
+        if (Math.abs(node.position.x) > 5) node.velocity.x *= -1;
+        if (Math.abs(node.position.y) > 5) node.velocity.y *= -1;
+        if (Math.abs(node.position.z) > 3) node.velocity.z *= -1;
+        
+        node.rotation.x += 0.01;
+        node.rotation.y += 0.01;
+    });
+
+    updateLines();
+    renderer.render(scene, camera);
+}
+
+animate();
+
+window.addEventListener('resize', () => {
+    const w = container.clientWidth || window.innerWidth;
+    const h = container.clientHeight || window.innerHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+});
+})();
+</script>
+</div>
+<!-- STITCH_THREEJS_END:ANIMATION_5 -->
+<!-- Hero Content -->
+<div class="relative z-10 w-full max-w-4xl mx-auto flex flex-col items-center text-center space-y-8 mt-12">
+<h1 class="font-display-lg text-display-lg text-on-surface drop-shadow-[0_0_30px_rgba(208,188,255,0.4)] tracking-tight">
+                        Découvrez votre <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-tertiary drop-shadow-none">prochain univers</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+                        Connectez les points de vos goûts animés. Explorez la toile des données pour trouver des recommandations d'une précision chirurgicale.
+                    </p>
+<!-- Prominent Search Bar (Terminal Style) -->
+<div class="w-full max-w-2xl relative group mt-4">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+<div class="relative flex items-center bg-surface-container/80 backdrop-blur-xl border border-outline-variant/50 rounded-lg px-6 py-4 shadow-2xl focus-within:border-secondary transition-colors">
+<span class="material-symbols-outlined text-secondary mr-4 text-[28px]">search</span>
+<input class="w-full bg-transparent border-none outline-none text-on-surface font-body-lg placeholder:text-on-surface-variant/60 focus:ring-0" placeholder="Rechercher des séries, personnages, studios..." type="text"/>
+<div class="hidden sm:flex items-center gap-1 ml-4 bg-surface-variant/80 px-2 py-1 rounded text-on-surface-variant font-label-mono text-[10px] border border-outline-variant/30 whitespace-nowrap">
+<span>CMD</span><span class="mx-0.5">+</span><span>K</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Decorative scanline over hero -->
+<div class="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(11,19,38,0.25)_50%)] bg-[length:100%_4px] z-20 opacity-30 mix-blend-overlay"></div>
+</section>
+<!-- Trending Section (Bento/Card Grid layout) -->
+<section class="flex-1 w-full max-w-max-width mx-auto px-gutter lg:px-margin-desktop py-16 z-10">
+<div class="flex items-center gap-4 mb-10">
+<div class="h-[2px] w-8 bg-secondary drop-shadow-[0_0_8px_rgba(76,215,246,0.8)]"></div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Tendances Actuelles</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Anime Card 1 -->
+<div class="group flex flex-col relative rounded-xl overflow-hidden bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 hover:border-primary/60 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(208,188,255,0.15)] hover:-translate-y-1 cursor-pointer">
+<div class="relative w-full h-56 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" data-alt="A highly detailed cinematic shot of a futuristic cyberpunk city skyline at night. Neon signs glow in vibrant cyan and magenta, reflecting off slick, rain-soaked streets. The atmosphere is dense and energetic, typical of a high-budget sci-fi anime production." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEH_qdwVSMCx0PKMgPAKVjqn5o599SksCiHQarBsYPo23w-vrOQm8I8nKC62__ZktYh1hyaZml4q-7snN7-tyWq8s-6UhY0zbs7kLa8wiH8ztREgut3YCFYtW9BBTbjHLw308gLZTUy9iYPpUkDPg9Je5oW3RpfHsQeSo34kkqb6QWlBe8LZduRSFGKraPianjdNEFMi4wqA6UMTxwkcJD4tMJ5z5kMvQmMpoRwLR6fsp-NwiGG3OhVg"/>
+<!-- Match Score Badge -->
+<div class="absolute top-3 right-3 bg-surface/90 backdrop-blur-sm border border-secondary/40 text-secondary font-label-mono text-[11px] px-2 py-1 rounded-sm shadow-[0_0_10px_rgba(76,215,246,0.2)]">
+                                98% MATCH
+                            </div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<h3 class="font-headline-md text-[20px] text-on-surface mb-2 font-bold group-hover:text-primary transition-colors">Cyberpunk: Edgerunners</h3>
+<p class="font-label-mono text-[12px] text-on-surface-variant/80 mb-4 line-clamp-2">Studio Trigger • Sci-Fi • Action</p>
+<div class="mt-auto flex flex-wrap gap-2">
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Sci-Fi</span>
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Cyberpunk</span>
+</div>
+</div>
+</div>
+<!-- Anime Card 2 -->
+<div class="group flex flex-col relative rounded-xl overflow-hidden bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 hover:border-primary/60 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(208,188,255,0.15)] hover:-translate-y-1 cursor-pointer">
+<div class="relative w-full h-56 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" data-alt="A dynamic, high-contrast action scene featuring dark fantasy elements. Glowing cursed energy in striking hues of violet and deep blue swirls around the focal point. The aesthetic is gritty yet polished, evoking intense supernatural combat sequences in modern anime." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_QQWB3gKLlUoG6FmeIFGTgOn5GmGhon4ThrdHJRHaOVWstSOYktLNpcBiuI-pdnOZL-filpfqV3hs5YYSqyLl2NllPpXoTyLJ-tpmEDPIz1bw2kQpl6VFqRqvxUE4EB9f5-TTay-JMJIUlx-DsprAGp7W4NwN1gRIWa567JNKl97lBiWZyCsR5HSFslEQIlBb1aIMb_NSPIhZA7REoy68FZGoQXWq4YVz40XyHYV6It4VSb9gMDUt8g"/>
+<div class="absolute top-3 right-3 bg-surface/90 backdrop-blur-sm border border-tertiary/40 text-tertiary font-label-mono text-[11px] px-2 py-1 rounded-sm shadow-[0_0_10px_rgba(78,222,163,0.2)]">
+                                92% MATCH
+                            </div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<h3 class="font-headline-md text-[20px] text-on-surface mb-2 font-bold group-hover:text-primary transition-colors">Jujutsu Kaisen</h3>
+<p class="font-label-mono text-[12px] text-on-surface-variant/80 mb-4 line-clamp-2">MAPPA • Dark Fantasy • Action</p>
+<div class="mt-auto flex flex-wrap gap-2">
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Action</span>
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Supernatural</span>
+</div>
+</div>
+</div>
+<!-- Anime Card 3 -->
+<div class="group flex flex-col relative rounded-xl overflow-hidden bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 hover:border-primary/60 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(208,188,255,0.15)] hover:-translate-y-1 cursor-pointer">
+<div class="relative w-full h-56 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" data-alt="A majestic fantasy landscape rendered in vibrant, painterly anime style. Vast rolling hills under a brilliant twilight sky, with ancient crumbling monolithic ruins in the distance. The color palette is rich with deep blues, purples, and warm golden hour sunlight, conveying a sense of epic adventure." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCe9nfCVhIiAXj7uwpyEMaNR7HmMsewr1Y2bbv0eIU22PW9MaU6ywVRO90VXHxEtOacF2yIcYuk6oItuT9jAOkAtd4MJ9SoeZfpjFILuVGtoldBf7PBl11b5-xdzOvJPSyttPu_6YzwgJ6h6IKSAgw5adekzrpb2dUgzRgHRI9044IUroaAzlWiL_xVBwYhNJaYqvc4nv5w1IvHbDFkzFNBYP4rMmL0kyENm5nvzxMi7VILZmOjU7LiCw"/>
+<div class="absolute top-3 right-3 bg-surface/90 backdrop-blur-sm border border-primary/40 text-primary font-label-mono text-[11px] px-2 py-1 rounded-sm">
+                                85% MATCH
+                            </div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<h3 class="font-headline-md text-[20px] text-on-surface mb-2 font-bold group-hover:text-primary transition-colors">Frieren: Beyond Journey's End</h3>
+<p class="font-label-mono text-[12px] text-on-surface-variant/80 mb-4 line-clamp-2">Madhouse • Adventure • Fantasy</p>
+<div class="mt-auto flex flex-wrap gap-2">
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Fantasy</span>
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Drama</span>
+</div>
+</div>
+</div>
+<!-- Anime Card 4 -->
+<div class="group flex flex-col relative rounded-xl overflow-hidden bg-surface-container-low/60 backdrop-blur-md border border-outline-variant/30 hover:border-primary/60 transition-all duration-300 hover:shadow-[0_8px_32px_rgba(208,188,255,0.15)] hover:-translate-y-1 cursor-pointer">
+<div class="relative w-full h-56 overflow-hidden bg-surface-variant">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" data-alt="A surreal and psychological anime aesthetic featuring a lone figure standing before an impossibly large, abstract geometric structure floating in a crimson sky. High contrast lighting creates deep, dramatic shadows. The mood is eerie, contemplative, and intensely atmospheric." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXOAvg7FWHu5I6totwxwRukz4OEX175VJNgeUqFxth94L9CvRA56ehcc7FFkV3WVXC5TWb8XEZLZQHDk5q_ak0i3Qt0A1Ss5veWYaT5vz_jYgnLvft2sw-9RvZYbp3omWpjaZPXjbwuNi0Y7TsukcFkUismz3dzRNpRmg-OAKFDFCVhH63LFEpBA2AwoHkS26O4lL6UL6QzfTnl1rbFAJNPot8viRrHps9Pex6tD0H43yBvOzquPP4nQ"/>
+<div class="absolute top-3 right-3 bg-surface/90 backdrop-blur-sm border border-outline/40 text-outline font-label-mono text-[11px] px-2 py-1 rounded-sm">
+                                78% MATCH
+                            </div>
+</div>
+<div class="p-5 flex flex-col flex-1">
+<h3 class="font-headline-md text-[20px] text-on-surface mb-2 font-bold group-hover:text-primary transition-colors">Neon Genesis Evangelion</h3>
+<p class="font-label-mono text-[12px] text-on-surface-variant/80 mb-4 line-clamp-2">Gainax • Mecha • Psychological</p>
+<div class="mt-auto flex flex-wrap gap-2">
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Mecha</span>
+<span class="bg-surface-variant text-on-surface text-[10px] font-label-caps px-2 py-1 border border-outline-variant/40 rounded-sm">Psychological</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

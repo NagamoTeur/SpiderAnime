@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AniGraph - Résultats: Shonen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&amp;family=Geist:wght@400;600&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#4cd7f6",
+                        "error-container": "#93000a",
+                        "surface-tint": "#d0bcff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-container": "#03b5d3",
+                        "on-surface": "#dae2fd",
+                        "inverse-primary": "#6d3bd7",
+                        "on-background": "#dae2fd",
+                        "on-secondary": "#003640",
+                        "inverse-on-surface": "#283044",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "tertiary-container": "#00a572",
+                        "on-primary": "#3c0091",
+                        "on-error": "#690005",
+                        "surface-container": "#171f33",
+                        "secondary-fixed": "#acedff",
+                        "inverse-surface": "#dae2fd",
+                        "outline-variant": "#494454",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "outline": "#958ea0",
+                        "surface-variant": "#2d3449",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#23005c",
+                        "on-primary-container": "#340080",
+                        "on-secondary-fixed": "#001f26",
+                        "surface-container-high": "#222a3d",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed": "#002113",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary": "#4edea3",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container-highest": "#2d3449",
+                        "on-secondary-container": "#00424e",
+                        "primary": "#d0bcff",
+                        "on-tertiary": "#003824",
+                        "surface-bright": "#31394d",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface": "#0b1326",
+                        "primary-fixed": "#e9ddff",
+                        "background": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "surface-dim": "#0b1326",
+                        "primary-container": "#a078ff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "unit": "4px",
+                        "max-width": "1440px",
+                        "margin-mobile": "16px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Sora"],
+                        "label-mono": ["Geist"],
+                        "label-caps": ["Geist"],
+                        "headline-md": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Sora"],
+                        "body-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-mono": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ambient-glow:hover {
+            box-shadow: 0 0 24px rgba(208, 188, 255, 0.3);
+            border-color: rgba(208, 188, 255, 0.5);
+        }
+        .neon-text {
+            text-shadow: 0 0 10px rgba(76, 215, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen overflow-x-hidden flex flex-col font-body-md">
+<!-- Background Shader -->
+<!-- STITCH_SHADER_START:ANIMATION_4 class="fixed inset-0 w-full h-full z-[-1] opacity-50" -->
+<div class="fixed inset-0 w-full h-full z-[-1] opacity-50" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_4" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_4');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    
+    // Cyberpunk color palette from design system
+    vec3 color1 = vec3(0.04, 0.07, 0.15); // Deep slate/navy (Background)
+    vec3 color2 = vec3(0.54, 0.36, 0.96); // Neon Violet
+    vec3 color3 = vec3(0.02, 0.71, 0.83); // Cyan
+    
+    float n = noise(uv * 4.0 + u_time * 0.2);
+    n += 0.5 * noise(uv * 8.0 - u_time * 0.1);
+    
+    float distToMouse = length(uv - mouse);
+    float glow = exp(-distToMouse * 4.0);
+    
+    vec3 finalColor = mix(color1, color2, n * 0.3);
+    finalColor = mix(finalColor, color3, glow * 0.2);
+    
+    // Add subtle grid or "neural" network pulse
+    float grid = sin(uv.x * 40.0 + u_time) * sin(uv.y * 40.0 + u_time);
+    finalColor += color3 * clamp(grid, 0.0, 1.0) * 0.02;
+    
+    gl_FragColor = vec4(finalColor, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_4 -->
+<!-- TopNavBar -->
+<nav class="bg-surface/70 backdrop-blur-xl font-headline-md text-headline-md border-b border-outline-variant/30 shadow-[0_4px_20px_rgba(208,188,255,0.1)] fixed top-0 w-full z-50 flex justify-between items-center px-gutter py-4 hidden md:flex">
+<div class="flex items-center gap-8">
+<div class="font-display-lg text-display-lg bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">AniGraph</div>
+<div class="flex gap-6 items-center pt-2">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded" href="#">Discover</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded" href="#">Graph</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded" href="#">Trending</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors hover:bg-white/5 transition-all duration-300 px-3 py-1 rounded" href="#">Seasonal</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<!-- Search Bar Terminal Style -->
+<div class="relative glass-panel rounded-lg flex items-center px-3 py-2 w-64 border border-outline-variant/30 focus-within:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-outline mr-2 text-sm">search</span>
+<input class="bg-transparent border-none outline-none text-on-surface font-label-mono text-sm w-full placeholder-outline-variant focus:ring-0 p-0" placeholder="Recherche..." type="text" value="Shonen"/>
+<span class="text-outline-variant font-label-mono text-xs ml-2">⌘K</span>
+</div>
+<button class="hover:bg-white/5 transition-all duration-300 p-2 rounded-full">
+<span class="material-symbols-outlined text-primary">account_circle</span>
+</button>
+</div>
+</nav>
+<!-- Mobile TopNavBar Shell (Simplified for context) -->
+<nav class="md:hidden glass-panel fixed top-0 w-full z-50 px-margin-mobile py-4 flex justify-between items-center border-b border-outline-variant/20">
+<div class="font-display-lg text-[24px] bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-bold">AniGraph</div>
+<button><span class="material-symbols-outlined text-primary">menu</span></button>
+</nav>
+<!-- Main Layout Container -->
+<div class="flex flex-1 pt-[80px] md:pt-[90px] h-full w-full max-w-[1440px] mx-auto">
+<!-- SideNavBar (Desktop) -->
+<aside class="hidden md:flex bg-surface-container/80 backdrop-blur-2xl text-secondary font-label-mono fixed left-0 top-0 h-full w-64 border-r border-outline-variant/20 shadow-xl z-40 pt-24 pb-8 flex-col justify-between">
+<div>
+<div class="px-6 mb-8">
+<div class="font-display-lg text-[20px] text-secondary mb-2">Terminal Session</div>
+<div class="text-outline-variant text-xs flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-tertiary animate-pulse"></div> User_01_Active
+                    </div>
+</div>
+<nav class="flex flex-col gap-2 w-full">
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-tertiary transition-all duration-200 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">hub</span> My Graph
+                    </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-tertiary transition-all duration-200 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">favorite</span> Favorites
+                    </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-tertiary transition-all duration-200 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">history</span> History
+                    </a>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-tertiary transition-all duration-200 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">settings</span> Settings
+                    </a>
+</nav>
+</div>
+<div class="px-4">
+<button class="w-full py-2 border border-secondary text-secondary rounded-lg mb-4 hover:bg-secondary/10 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">open_in_full</span> Expand Graph
+                </button>
+<a class="text-on-surface-variant px-4 py-3 hover:bg-surface-variant/50 hover:text-error transition-all duration-200 flex items-center gap-3 rounded" href="#">
+<span class="material-symbols-outlined">logout</span> Logout
+                </a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 p-margin-mobile md:p-margin-desktop flex flex-col md:flex-row gap-gutter">
+<!-- Filters Sidebar -->
+<div class="w-full md:w-1/4 xl:w-1/5 space-y-6">
+<div class="glass-panel rounded-xl p-6 h-fit sticky top-[100px]">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">tune</span> Filtres
+                    </h2>
+<!-- Genre Filter -->
+<div class="mb-6">
+<h3 class="font-label-caps text-label-caps text-outline-variant mb-3 uppercase">Genre</h3>
+<div class="flex flex-wrap gap-2">
+<span class="bg-primary/20 text-primary border border-primary/50 px-3 py-1 rounded-md text-xs font-label-mono cursor-pointer">Action</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-3 py-1 rounded-md text-xs font-label-mono hover:border-secondary/50 cursor-pointer transition-colors">Aventure</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-3 py-1 rounded-md text-xs font-label-mono hover:border-secondary/50 cursor-pointer transition-colors">Comédie</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-3 py-1 rounded-md text-xs font-label-mono hover:border-secondary/50 cursor-pointer transition-colors">Drame</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-3 py-1 rounded-md text-xs font-label-mono hover:border-secondary/50 cursor-pointer transition-colors">Fantasy</span>
+</div>
+</div>
+<!-- Studio Filter -->
+<div class="mb-6">
+<h3 class="font-label-caps text-label-caps text-outline-variant mb-3 uppercase">Studio</h3>
+<div class="flex flex-col gap-2 font-label-mono text-sm text-on-surface-variant">
+<label class="flex items-center gap-2 cursor-pointer hover:text-secondary transition-colors">
+<input class="rounded bg-surface border-outline-variant text-secondary focus:ring-secondary/50" type="checkbox"/> MAPPA
+                            </label>
+<label class="flex items-center gap-2 cursor-pointer hover:text-secondary transition-colors">
+<input checked="" class="rounded bg-surface border-outline-variant text-secondary focus:ring-secondary/50" type="checkbox"/> Bones
+                            </label>
+<label class="flex items-center gap-2 cursor-pointer hover:text-secondary transition-colors">
+<input class="rounded bg-surface border-outline-variant text-secondary focus:ring-secondary/50" type="checkbox"/> Ufotable
+                            </label>
+<label class="flex items-center gap-2 cursor-pointer hover:text-secondary transition-colors">
+<input class="rounded bg-surface border-outline-variant text-secondary focus:ring-secondary/50" type="checkbox"/> Madhouse
+                            </label>
+</div>
+</div>
+<!-- Season Filter -->
+<div>
+<h3 class="font-label-caps text-label-caps text-outline-variant mb-3 uppercase">Saison</h3>
+<select class="w-full bg-surface-variant border border-outline-variant/30 text-on-surface-variant rounded-lg p-2 font-label-mono text-sm focus:border-secondary focus:ring-1 focus:ring-secondary outline-none">
+<option>Toutes les saisons</option>
+<option>Printemps 2024</option>
+<option>Hiver 2024</option>
+<option>Automne 2023</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Results Grid -->
+<div class="w-full md:w-3/4 xl:w-4/5">
+<div class="mb-8 flex justify-between items-end">
+<div>
+<h1 class="font-display-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">Résultats pour: <span class="text-secondary neon-text">Shonen</span></h1>
+<p class="text-outline-variant font-label-mono text-sm mt-2">142 correspondances trouvées</p>
+</div>
+<div class="hidden sm:flex items-center gap-2 font-label-mono text-sm text-outline-variant">
+<span>Trier par:</span>
+<select class="bg-transparent border-none text-primary cursor-pointer outline-none focus:ring-0">
+<option class="bg-surface">Score de Match</option>
+<option class="bg-surface">Popularité</option>
+<option class="bg-surface">Date de sortie</option>
+</select>
+</div>
+</div>
+<!-- Anime Cards Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="glass-panel rounded-xl overflow-hidden ambient-glow group relative flex flex-col">
+<div class="relative h-64 w-full overflow-hidden">
+<img alt="Anime Poster" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A highly detailed illustration of a fierce anime warrior with glowing eyes in a dynamic pose, surrounded by swirling energy in a dark, cyberpunk-styled ruined city. High contrast, cinematic lighting, neon blue and violet accents, modern anime aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBE6F_mUeE_qLWjQmL1v5kiPui15on-Wmxh6WGxdKaXcAmppbO_5gfSrzkHACWEB1XnR4RnCzpRceimROm5K0LbLT5DgA8FVAtPS2I5kON4ni2uyLd6dpvQlD6VeN73Gur5nZqn3GAf2ybFKFYqNP79vuYtlLQzQu1wXEfrfQF39YMc6lOTwOkyUEWnP0WcUHStT4bRgpFHSdFgxuUfxIwm2S5pxaQCOkEMCyoDXCDApYdEEycA60FCeA"/>
+<div class="absolute top-3 left-3 bg-surface-container-highest/80 backdrop-blur-md border border-secondary/30 px-2 py-1 rounded font-label-mono text-xs text-secondary flex items-center gap-1 shadow-lg">
+<span class="material-symbols-outlined text-[14px]">bolt</span> 98% Match
+                            </div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-highest via-transparent to-transparent opacity-90"></div>
+</div>
+<div class="p-4 flex flex-col flex-1 z-10 relative -mt-10 bg-surface-container-highest/90 backdrop-blur-md rounded-t-xl">
+<div class="flex gap-2 mb-2">
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">Action</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">Bones</span>
+</div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold mb-1 line-clamp-1">My Hero Academia</h3>
+<p class="text-outline-variant text-sm line-clamp-2 mb-4 font-body-md">Dans un monde où 80 % de la population possède un super-pouvoir appelé alter, les héros font partie de la vie quotidienne.</p>
+<div class="mt-auto">
+<button class="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 hover:border-primary py-2 rounded-lg font-label-mono text-sm flex items-center justify-center gap-2 transition-all duration-300">
+<span class="material-symbols-outlined text-base">add</span> Ajouter au Graphe
+                                </button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="glass-panel rounded-xl overflow-hidden ambient-glow group relative flex flex-col">
+<div class="relative h-64 w-full overflow-hidden">
+<img alt="Anime Poster" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A striking digital painting of an anime protagonist wielding a katana that glows with intensely bright green flames. The background is a minimalist, dark abstract void with faint geometric data lines connecting. Moody, intense, sleek tech-fantasy style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzLpS1kvuHRW5GIXLLwFM3HSXr6IcUyUpqE4BHnMCcyJT0FPFMs69XVhKomMTE9g5cnr-AUHFxfy9qbDrZGFfhQBtQ-4mzI1GlhsD-fPVhcTQoXYyiTyog2tOon_3Qk7saZSAae1s28pR8sP72kT1Vs7AAagRz9JMsTkVNG-eLtRSrFHOp7W3y64ivOvXpvFf1-rnyCu-mD5yyfsqBp5xRklEqlw9gPxBX1gI1iDGqXBj6ADajoGpj1A"/>
+<div class="absolute top-3 left-3 bg-surface-container-highest/80 backdrop-blur-md border border-secondary/30 px-2 py-1 rounded font-label-mono text-xs text-secondary flex items-center gap-1 shadow-lg">
+<span class="material-symbols-outlined text-[14px]">bolt</span> 94% Match
+                            </div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-highest via-transparent to-transparent opacity-90"></div>
+</div>
+<div class="p-4 flex flex-col flex-1 z-10 relative -mt-10 bg-surface-container-highest/90 backdrop-blur-md rounded-t-xl">
+<div class="flex gap-2 mb-2">
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">Dark Fantasy</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">MAPPA</span>
+</div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold mb-1 line-clamp-1">Jujutsu Kaisen</h3>
+<p class="text-outline-variant text-sm line-clamp-2 mb-4 font-body-md">Souffrance, regrets, humiliations... les sentiments négatifs que ressentent les humains se transforment peu à peu en fléaux.</p>
+<div class="mt-auto">
+<button class="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 hover:border-primary py-2 rounded-lg font-label-mono text-sm flex items-center justify-center gap-2 transition-all duration-300">
+<span class="material-symbols-outlined text-base">add</span> Ajouter au Graphe
+                                </button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="glass-panel rounded-xl overflow-hidden ambient-glow group relative flex flex-col">
+<div class="relative h-64 w-full overflow-hidden">
+<img alt="Anime Poster" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="Cinematic wide shot of an anime character standing on a cliff edge overlooking a vast, fantastical landscape with floating islands and complex magical sigils glowing in the sky. Vivid colors, deep shadows, highly detailed scenic anime art." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdhQnvIhd6YCOx7uxZzxcPYC00bjRuGzZMQma_FYtYtA8-JGEAFf4yEjsMxrI6wYz2luihrD9iuYjt-EBPXJTvtU-Eak4BdCXUeEaLFNkXr8XKHWnL0GeOOWtgWBNmdeFdtBcEjHwTT5eEpSKsrBEZIRcvt9Uz8wmYKweyVF-RsCdsvCKf6C0SkUDihgK_pZ-F9gFp67AdHqLdfGOdjB3P5g2dsGCZ3s8BXgt-znMH-JO-itW9Uo7A-A"/>
+<div class="absolute top-3 left-3 bg-surface-container-highest/80 backdrop-blur-md border border-secondary/30 px-2 py-1 rounded font-label-mono text-xs text-secondary flex items-center gap-1 shadow-lg">
+<span class="material-symbols-outlined text-[14px]">bolt</span> 89% Match
+                            </div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-highest via-transparent to-transparent opacity-90"></div>
+</div>
+<div class="p-4 flex flex-col flex-1 z-10 relative -mt-10 bg-surface-container-highest/90 backdrop-blur-md rounded-t-xl">
+<div class="flex gap-2 mb-2">
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">Aventure</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">Toei</span>
+</div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold mb-1 line-clamp-1">One Piece</h3>
+<p class="text-outline-variant text-sm line-clamp-2 mb-4 font-body-md">Monkey D. Luffy est un garçon qui rêve de devenir le Roi des Pirates en trouvant le légendaire trésor, le One Piece.</p>
+<div class="mt-auto">
+<button class="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 hover:border-primary py-2 rounded-lg font-label-mono text-sm flex items-center justify-center gap-2 transition-all duration-300">
+<span class="material-symbols-outlined text-base">add</span> Ajouter au Graphe
+                                </button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="glass-panel rounded-xl overflow-hidden ambient-glow group relative flex flex-col">
+<div class="relative h-64 w-full overflow-hidden">
+<img alt="Anime Poster" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A gritty, cyberpunk anime aesthetic showing two characters clashing weapons, sparks flying in neon magenta and cyan. The scene is set in an industrial, tech-heavy environment with stark contrasting shadows and blinding glowing accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdeGqudYefLxzqRQhENWbxPbJlf-wl3JgYzChqdNQbFDIpumWOSKtDsvIYqx00MQKjh7ftHfNJoafIYeEe4q0YlgFfoEmALUzN4QGzoUec78vq-a0Ap6gs8vPz6WGgEeecgMrAvzj--6HWImaOd-6FcAOjUO7xQcgYMn5y6pEcCT92sU3z2G0c7s1n1EAmCjenkgr2zIXPGBvNI00zV425crbA1i0Ii_igpplaXfHErpqQSBONaP0Pxw"/>
+<div class="absolute top-3 left-3 bg-surface-container-highest/80 backdrop-blur-md border border-secondary/30 px-2 py-1 rounded font-label-mono text-xs text-secondary flex items-center gap-1 shadow-lg">
+<span class="material-symbols-outlined text-[14px]">bolt</span> 85% Match
+                            </div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container-highest via-transparent to-transparent opacity-90"></div>
+</div>
+<div class="p-4 flex flex-col flex-1 z-10 relative -mt-10 bg-surface-container-highest/90 backdrop-blur-md rounded-t-xl">
+<div class="flex gap-2 mb-2">
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">Action</span>
+<span class="bg-surface-variant border border-outline-variant/30 text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-label-mono uppercase">Ufotable</span>
+</div>
+<h3 class="font-headline-md text-body-lg text-on-surface font-semibold mb-1 line-clamp-1">Demon Slayer</h3>
+<p class="text-outline-variant text-sm line-clamp-2 mb-4 font-body-md">Le Japon, à l'ère Taisho. Tanjiro, un jeune garçon au grand cœur, gagne sa vie en vendant du charbon.</p>
+<div class="mt-auto">
+<button class="w-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 hover:border-primary py-2 rounded-lg font-label-mono text-sm flex items-center justify-center gap-2 transition-all duration-300">
+<span class="material-symbols-outlined text-base">add</span> Ajouter au Graphe
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-10 flex justify-center items-center gap-2 font-label-mono">
+<button class="p-2 rounded bg-surface-variant text-on-surface-variant hover:text-primary transition-colors disabled:opacity-50"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="w-8 h-8 rounded bg-primary/20 text-primary border border-primary/50 flex items-center justify-center">1</button>
+<button class="w-8 h-8 rounded bg-surface-variant text-on-surface-variant hover:bg-surface-bright transition-colors flex items-center justify-center">2</button>
+<button class="w-8 h-8 rounded bg-surface-variant text-on-surface-variant hover:bg-surface-bright transition-colors flex items-center justify-center">3</button>
+<span class="text-outline-variant">...</span>
+<button class="w-8 h-8 rounded bg-surface-variant text-on-surface-variant hover:bg-surface-bright transition-colors flex items-center justify-center">12</button>
+<button class="p-2 rounded bg-surface-variant text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest text-on-surface-variant font-label-caps text-label-caps full-width border-t border-outline-variant/10 w-full py-6 px-gutter flex justify-between items-center mt-auto z-10 relative">
+<div>© 2024 AniGraph Terminal. Data-Pulse active.</div>
+<div class="flex gap-4">
+<a class="hover:text-secondary fade-in transition-opacity" href="#">API</a>
+<a class="hover:text-secondary fade-in transition-opacity" href="#">Privacy</a>
+<a class="hover:text-secondary fade-in transition-opacity" href="#">Status</a>
+</div>
+<div class="text-primary font-bold">AniGraph</div>
+</footer>
+</body></html>

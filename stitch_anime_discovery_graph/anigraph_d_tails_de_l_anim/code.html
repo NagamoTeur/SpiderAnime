@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AniGraph - Anime Detail</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&amp;family=Geist:wght@400;600&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#4cd7f6",
+                        "error-container": "#93000a",
+                        "surface-tint": "#d0bcff",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "secondary-container": "#03b5d3",
+                        "on-surface": "#dae2fd",
+                        "inverse-primary": "#6d3bd7",
+                        "on-background": "#dae2fd",
+                        "on-secondary": "#003640",
+                        "inverse-on-surface": "#283044",
+                        "secondary-fixed-dim": "#4cd7f6",
+                        "tertiary-container": "#00a572",
+                        "on-primary": "#3c0091",
+                        "on-error": "#690005",
+                        "surface-container": "#171f33",
+                        "secondary-fixed": "#acedff",
+                        "inverse-surface": "#dae2fd",
+                        "outline-variant": "#494454",
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "outline": "#958ea0",
+                        "surface-variant": "#2d3449",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed": "#23005c",
+                        "on-primary-container": "#340080",
+                        "on-secondary-fixed": "#001f26",
+                        "surface-container-high": "#222a3d",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed": "#002113",
+                        "error": "#ffb4ab",
+                        "surface-container-lowest": "#060e20",
+                        "tertiary": "#4edea3",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-tertiary-container": "#00311f",
+                        "surface-container-highest": "#2d3449",
+                        "on-secondary-container": "#00424e",
+                        "primary": "#d0bcff",
+                        "on-tertiary": "#003824",
+                        "surface-bright": "#31394d",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary-fixed-dim": "#d0bcff",
+                        "surface": "#0b1326",
+                        "primary-fixed": "#e9ddff",
+                        "background": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "surface-dim": "#0b1326",
+                        "primary-container": "#a078ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "unit": "4px",
+                        "max-width": "1440px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Sora"],
+                        "label-mono": ["Geist"],
+                        "label-caps": ["Geist"],
+                        "headline-md": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Sora"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "label-mono": ["14px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "1.3", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glow-btn {
+            box-shadow: 0 0 15px rgba(208, 188, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .glow-btn:hover {
+            box-shadow: 0 0 25px rgba(208, 188, 255, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        .spider-web-line {
+            background: linear-gradient(90deg, #d0bcff 0%, #4cd7f6 100%);
+            height: 1px;
+            opacity: 0.5;
+        }
+
+        /* Ambient Glow for nodes */
+        .node-glow {
+            box-shadow: 0 0 12px rgba(208, 188, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen relative overflow-x-hidden font-body-md antialiased flex flex-col">
+<!-- Background Shader -->
+<div class="fixed inset-0 z-0 pointer-events-none">
+<!-- STITCH_SHADER_START:ANIMATION_4 class="absolute inset-0 w-full h-full" -->
+<div class="absolute inset-0 w-full h-full" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_4" style="display:block;width:100%;height:100%"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_4');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+varying vec2 v_texCoord;
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+
+float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    
+    // Cyberpunk color palette from design system
+    vec3 color1 = vec3(0.04, 0.07, 0.15); // Deep slate/navy (Background)
+    vec3 color2 = vec3(0.54, 0.36, 0.96); // Neon Violet
+    vec3 color3 = vec3(0.02, 0.71, 0.83); // Cyan
+    
+    float n = noise(uv * 4.0 + u_time * 0.2);
+    n += 0.5 * noise(uv * 8.0 - u_time * 0.1);
+    
+    float distToMouse = length(uv - mouse);
+    float glow = exp(-distToMouse * 4.0);
+    
+    vec3 finalColor = mix(color1, color2, n * 0.3);
+    finalColor = mix(finalColor, color3, glow * 0.2);
+    
+    // Add subtle grid or "neural" network pulse
+    float grid = sin(uv.x * 40.0 + u_time) * sin(uv.y * 40.0 + u_time);
+    finalColor += color3 * clamp(grid, 0.0, 1.0) * 0.02;
+    
+    gl_FragColor = vec4(finalColor, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_4 -->
+</div>
+<!-- Top Navigation (Hidden on Detail screen to focus on canvas, but keeping header elements for context if needed, opting to hide as per instruction "Task-Focused: Any sub-page featuring a 'Close' or 'Back' action... suppress navigation") -->
+<div class="relative z-10 w-full px-gutter py-6 flex items-center justify-between">
+<button class="glass-panel rounded-full p-2 text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2 pr-4">
+<span class="material-symbols-outlined">arrow_back</span>
+<span class="font-label-caps text-label-caps uppercase tracking-widest">Retour</span>
+</button>
+<div class="font-display-lg text-headline-md bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            AniGraph
+        </div>
+<div class="w-10"></div> <!-- Spacer -->
+</div>
+<!-- Main Content Area -->
+<main class="relative z-10 flex-grow px-gutter pb-gutter max-w-max-width mx-auto w-full grid grid-cols-1 md:grid-cols-12 gap-6 items-start mt-4">
+<!-- Left Column: Hero Image & Info -->
+<section class="col-span-1 md:col-span-5 flex flex-col gap-6">
+<!-- Hero Card -->
+<div class="glass-panel rounded-xl overflow-hidden group relative">
+<div class="relative w-full aspect-[2/3]">
+<img class="w-full h-full object-cover" data-alt="A highly detailed portrait illustration of a white-haired elven mage holding a staff, rendered in a high-quality anime style with cyberpunk-minimalist lighting. The background is a dark abyss hinting at a data network, illuminated by high-contrast neon cyan and violet lights emitting a soft ambient glow, fitting perfectly into a futuristic digital terminal aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSmn5Wwo0-EtFixxMAoLWv2Pyf4pDMOGsU0xHn52YfGdL0ff5dM_BmbIXn15eIKsk2jbFqYiWqFVM_nJP3_AfcF7kCgLY_9idLr27W-_P61Z_kAkLnIsZyHVPKQhn0i-efT-tHnRrDKslcUW7Az71ZASgr3lA-iPJy7CewGu1FBFiD4XRHynum55YtNPSOqC-6V7Yp86ouw85lNdCtkjK96diJJeoYFTvjGOF1MLD75_M0KSjg0egafw"/>
+<!-- Match Score Overlay -->
+<div class="absolute top-4 right-4 bg-surface/80 backdrop-blur-md rounded border border-secondary/30 px-3 py-1 flex items-center gap-2">
+<span class="font-label-mono text-label-mono text-secondary">Match</span>
+<span class="font-label-mono text-label-mono text-white font-bold">98%</span>
+</div>
+</div>
+<div class="p-6 flex flex-col gap-4">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-on-surface">Sousou no Frieren</h1>
+<div class="flex flex-wrap gap-2">
+<span class="bg-surface-variant border border-outline-variant/50 rounded px-2 py-1 font-label-caps text-label-caps text-on-surface-variant">FANTASY</span>
+<span class="bg-surface-variant border border-outline-variant/50 rounded px-2 py-1 font-label-caps text-label-caps text-on-surface-variant">DRAMA</span>
+<span class="bg-surface-variant border border-outline-variant/50 rounded px-2 py-1 font-label-caps text-label-caps text-on-surface-variant">ADVENTURE</span>
+<span class="bg-surface-variant border border-outline-variant/50 rounded px-2 py-1 font-label-caps text-label-caps text-secondary">STUDIO MADHOUSE</span>
+</div>
+<p class="font-body-md text-on-surface-variant mt-2">
+                        Après la défaite du roi des démons, le groupe de héros est dissous. Frieren, une elfe à la longévité exceptionnelle, entreprend un voyage pour comprendre l'humanité et faire ses adieux à ses anciens compagnons avant qu'ils ne disparaissent.
+                    </p>
+<div class="flex items-center gap-4 mt-4 pt-4 border-t border-outline-variant/20">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Épisodes</span>
+<span class="font-label-mono text-label-mono text-on-surface">28</span>
+</div>
+<div class="w-px h-8 bg-outline-variant/20"></div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Statut</span>
+<span class="font-label-mono text-label-mono text-tertiary">Terminé</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary CTA -->
+<button class="w-full bg-primary text-on-primary font-headline-md text-body-md py-4 rounded-lg glow-btn flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">hub</span>
+                Lancer dans le Graphe
+            </button>
+</section>
+<!-- Right Column: Graph Connections (Similarities) -->
+<section class="col-span-1 md:col-span-7 flex flex-col gap-6">
+<div class="glass-panel rounded-xl p-6 h-full flex flex-col">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-secondary">device_hub</span>
+<h2 class="font-headline-md text-on-surface">Connexions Suggérées</h2>
+</div>
+<p class="font-body-md text-on-surface-variant mb-8">
+                    Découvrez comment cet anime se connecte à votre réseau de favoris existant. Cliquez sur un nœud pour explorer les similarités.
+                </p>
+<!-- Simulated Graph Nodes List -->
+<div class="flex flex-col gap-4">
+<!-- Connection Item 1 -->
+<div class="group relative flex items-center gap-4 p-4 rounded-lg border border-transparent hover:border-primary/30 hover:bg-white/5 transition-all cursor-pointer">
+<!-- Node Circle -->
+<div class="w-12 h-12 rounded-full border-2 border-primary bg-surface flex items-center justify-center node-glow z-10 shrink-0">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A minimalist circular icon depicting a stylized sword and shield glowing in neon cyan against a deep dark navy background, representing a fantasy anime connection node in a cyberpunk user interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaBy9_ebXRlS-TqDJx13EEk6GqgWDQc1CWfInY_kt_V3O-rk25mcvSU68oK5Mk05_1xrsnv2q6MQCgDE-sEjKss55wD6RUyJZjGucPj7V_XTsrtadCYhH0N-AoRrwJDKBBGO11rDfZKAr76StTZFFJQZGemrzticZiZxdFg_NAkbys7INgIc6ZD-6b6DMqz6bnxo-2rh-XWfIJ8Q9mAoFIZ7BHlfLqyG3MhSSxnbZECdCdN2jpws-PLw"/>
+</div>
+<!-- Visual Line to content -->
+<div class="absolute left-10 top-1/2 w-6 spider-web-line -z-10 group-hover:w-full transition-all duration-500 origin-left"></div>
+<div class="flex-grow z-10 bg-surface/50 p-3 rounded backdrop-blur-sm border border-outline-variant/20">
+<h3 class="font-label-mono text-label-mono text-on-surface font-semibold">Mushoku Tensei</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-secondary material-symbols-outlined text-sm" style="font-size: 16px;">link</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Thème de voyage, Magie approfondie</span>
+</div>
+</div>
+<button class="z-10 text-on-surface-variant hover:text-primary p-2 shrink-0">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<!-- Connection Item 2 -->
+<div class="group relative flex items-center gap-4 p-4 rounded-lg border border-transparent hover:border-primary/30 hover:bg-white/5 transition-all cursor-pointer">
+<!-- Node Circle -->
+<div class="w-12 h-12 rounded-full border-2 border-tertiary bg-surface flex items-center justify-center node-glow z-10 shrink-0">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A minimalist circular icon depicting an open book glowing in neon violet against a dark slate background, representing a fantasy lore anime connection node in a highly technical data terminal interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpIltcXOBCeZCninqF7DX6E838No83zw3zJoa0yUvJy-xxWT-MHzbOQ9DaurepHRLgIrISuEpBO9bm7HZQjHYKx4q_aJ3CpM1R6ZbtGiHYI30uT1WMLukCs5Z7y-a0HdMP8sMJMCWdMa8mp1AaKh1yFfkZ5o2joHOLkdbH155hNSNiktgKE0BKW_CstCedcfOLCWoCxtAJ2NZlpTa4weUM6YM_e22ZK9g6-LobGVCSIFoeGDit7YlUBA"/>
+</div>
+<!-- Visual Line to content -->
+<div class="absolute left-10 top-1/2 w-6 spider-web-line -z-10 group-hover:w-full transition-all duration-500 origin-left"></div>
+<div class="flex-grow z-10 bg-surface/50 p-3 rounded backdrop-blur-sm border border-outline-variant/20">
+<h3 class="font-label-mono text-label-mono text-on-surface font-semibold">Violet Evergarden</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-secondary material-symbols-outlined text-sm" style="font-size: 16px;">link</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Ton mélancolique, Quête de sens</span>
+</div>
+</div>
+<button class="z-10 text-on-surface-variant hover:text-primary p-2 shrink-0">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+<!-- Connection Item 3 -->
+<div class="group relative flex items-center gap-4 p-4 rounded-lg border border-transparent hover:border-primary/30 hover:bg-white/5 transition-all cursor-pointer">
+<!-- Node Circle -->
+<div class="w-12 h-12 rounded-full border-2 border-secondary bg-surface flex items-center justify-center node-glow z-10 shrink-0">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A minimalist circular icon depicting a glowing potion bottle in neon cyan on a pitch black background, symbolizing an alchemy or fantasy slice-of-life anime node in a cyberpunk network map." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx4zAo4AleM0sbRFlFmVSdBGebRZHybA3as6aREO5z-QyUlZ70dkM4stOVtMAEV4EmxjUz_kTjNdxw1RBjA5vElFgYqnpv6tXP-iYhfpLIHStlSj9g4jV9bsE1k8ndloi850EDbU7Vo2TcOuW0Dy3cNsfEXF9UPG-rViWDuDajqLDG6b5ps9opmVOal0CVhb2SrIaeZxI3K6SWbeWuIAu2PcvK3U0pQ1Ty8iGHdFPfQ5KZglGtE3t7ZQ"/>
+</div>
+<!-- Visual Line to content -->
+<div class="absolute left-10 top-1/2 w-6 spider-web-line -z-10 group-hover:w-full transition-all duration-500 origin-left"></div>
+<div class="flex-grow z-10 bg-surface/50 p-3 rounded backdrop-blur-sm border border-outline-variant/20">
+<h3 class="font-label-mono text-label-mono text-on-surface font-semibold">To Your Eternity</h3>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-secondary material-symbols-outlined text-sm" style="font-size: 16px;">link</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Immortalité, Découverte du monde</span>
+</div>
+</div>
+<button class="z-10 text-on-surface-variant hover:text-primary p-2 shrink-0">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

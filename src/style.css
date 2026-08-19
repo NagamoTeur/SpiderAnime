@@ -1,0 +1,87 @@
+/* Custom Cyberpunk & Glassmorphism Utilities */
+
+.glass-panel {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+    background: rgba(23, 31, 51, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(208, 188, 255, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    border-color: rgba(208, 188, 255, 0.5);
+    box-shadow: 0 0 20px rgba(208, 188, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.ambient-glow {
+    box-shadow: 0 0 20px 2px rgba(208, 188, 255, 0.35);
+}
+
+.ambient-glow-cyan {
+    box-shadow: 0 0 15px 1px rgba(76, 215, 246, 0.3);
+}
+
+.glow-btn {
+    box-shadow: 0 0 15px rgba(208, 188, 255, 0.3);
+    transition: all 0.3s ease;
+}
+
+.glow-btn:hover {
+    box-shadow: 0 0 25px rgba(208, 188, 255, 0.6);
+    transform: translateY(-2px);
+}
+
+.neon-border-hover:hover {
+    border-color: rgba(208, 188, 255, 0.6);
+    box-shadow: 0 0 10px rgba(208, 188, 255, 0.2);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(11, 19, 38, 0.5);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(149, 142, 160, 0.3);
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(208, 188, 255, 0.5);
+}
+
+/* Animations */
+@keyframes energy-pulse {
+    0% {
+        stroke-dashoffset: 20;
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        stroke-dashoffset: 0;
+        opacity: 0.3;
+    }
+}
+
+.animate-pulse-fast {
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Canvas overlay styles */
+#graph-canvas {
+    touch-action: none;
+}
