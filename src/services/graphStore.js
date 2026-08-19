@@ -1,13 +1,14 @@
 /**
- * Graph Store & State Manager for AniGraph (Branch: feature/anilist-api)
- * Powered by AniList GraphQL API.
+ * Graph Store & State Manager for SpiderAnime
+ * Manages nodes, spider-web links, recommendations, PER-USER persistence,
+ * and comprehensive Anime Watchlist & Pokédex Analytics.
  */
 
 import { getAnimeRecommendations, STARTER_ANIME_DATA } from './aniListApi.js';
 import { authService } from './authService.js';
 import { RecommendationEngine } from './recommendationEngine.js';
 
-const STORAGE_PREFIX = 'anigraph_spider_data_anilist_';
+const STORAGE_PREFIX = 'spideranime_watch_data_v1_';
 
 class GraphStore {
     constructor() {
@@ -51,14 +52,31 @@ class GraphStore {
         let completed = 0;
         let watching = 0;
         let planToWatch = 0;
+        let dropped = 0;
+        let totalWatchedEpisodes = 0;
 
         this.nodes.forEach(n => {
-            if (n.watchStatus === 'completed') completed++;
-            else if (n.watchStatus === 'watching') watching++;
-            else if (n.watchStatus === 'plan_to_watch') planToWatch++;
+            const status = n.watchStatus || 'plan_to_watch';
+            const watched = n.watchedEpisodes || 0;
+            totalWatchedEpisodes += watched;
+
+            if (status === 'completed') completed++;
+            else if (status === 'watching') watching++;
+            else if (status === 'plan_to_watch') planToWatch++;
+            else if (status === 'dropped') dropped++;
         });
 
-        return { completed, watching, planToWatch, total: this.nodes.length };
+        const totalHours = Math.round((totalWatchedEpisodes * 24) / 60);
+
+        return {
+            completed,
+            watching,
+            planToWatch,
+            dropped,
+            total: this.nodes.length,
+            totalWatchedEpisodes,
+            totalHours
+        };
     }
 
     getNode(nodeId) {
@@ -110,6 +128,7 @@ class GraphStore {
             title: aot.title_english || aot.title,
             image_url: aot.image_url,
             score: aot.score,
+            userScore: 9,
             isFavorite: true,
             isRoot: true,
             watchStatus: 'completed',
@@ -128,6 +147,7 @@ class GraphStore {
             title: dn.title_english || dn.title,
             image_url: dn.image_url,
             score: dn.score,
+            userScore: 10,
             isFavorite: true,
             watchStatus: 'completed',
             watchedEpisodes: 37,
@@ -145,6 +165,7 @@ class GraphStore {
             title: oshi.title_english || oshi.title,
             image_url: oshi.image_url,
             score: oshi.score,
+            userScore: 8,
             isFavorite: false,
             watchStatus: 'watching',
             watchedEpisodes: 6,
@@ -178,6 +199,7 @@ class GraphStore {
                 title: anime.title || anime.title_english,
                 image_url: anime.image_url || anime.images?.jpg?.image_url || '',
                 score: anime.score || 8.0,
+                userScore: anime.userScore || 0,
                 isFavorite: !!anime.isFavorite,
                 isRoot: !!anime.isRoot,
                 expanded: false,
@@ -195,6 +217,8 @@ class GraphStore {
         } else {
             if (anime.isFavorite !== undefined) existing.isFavorite = anime.isFavorite;
             if (anime.isRoot !== undefined) existing.isRoot = anime.isRoot;
+            if (anime.watchStatus !== undefined) existing.watchStatus = anime.watchStatus;
+            if (anime.watchedEpisodes !== undefined) existing.watchedEpisodes = anime.watchedEpisodes;
             if (anime.relevancePct !== undefined) existing.relevancePct = anime.relevancePct;
         }
 
@@ -255,6 +279,23 @@ class GraphStore {
         await this.expandNode(node.id);
     }
 
+    setWatchStatus(animeData, status) {
+        const totalEp = animeData.episodes || animeData.totalEpisodes || 12;
+        let watched = animeData.watchedEpisodes || 0;
+        if (status === 'completed') watched = totalEp;
+
+        const node = this.addNode({
+            ...animeData,
+            watchStatus: status,
+            watchedEpisodes: watched,
+            totalEpisodes: totalEp
+        });
+
+        this.save();
+        this.notify();
+        return node;
+    }
+
     async expandNode(nodeId) {
         const node = this.getNode(nodeId);
         if (!node) return;
@@ -298,11 +339,12 @@ class GraphStore {
         }
     }
 
-    updateWatchProgress(nodeId, status, watchedEp) {
+    updateWatchProgress(nodeId, status, watchedEp, userScore) {
         const node = this.getNode(nodeId);
         if (!node) return;
 
         if (status) node.watchStatus = status;
+        if (userScore !== undefined) node.userScore = userScore;
         if (watchedEp !== undefined) {
             node.watchedEpisodes = Math.max(0, Math.min(node.totalEpisodes || 999, watchedEp));
             if (node.totalEpisodes && node.watchedEpisodes >= node.totalEpisodes) {
@@ -312,6 +354,14 @@ class GraphStore {
 
         this.save();
         this.notify();
+    }
+
+    incrementEpisode(nodeId) {
+        const node = this.getNode(nodeId);
+        if (!node) return;
+
+        const newWatched = (node.watchedEpisodes || 0) + 1;
+        this.updateWatchProgress(nodeId, node.watchStatus, newWatched);
     }
 
     toggleFavorite(nodeId) {
@@ -360,6 +410,7 @@ class GraphStore {
                 title: n.title,
                 image_url: n.image_url,
                 score: n.score,
+                userScore: n.userScore,
                 isFavorite: n.isFavorite,
                 isRoot: n.isRoot,
                 expanded: n.expanded,

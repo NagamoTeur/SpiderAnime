@@ -1,7 +1,7 @@
 /**
- * DiscoveryView.js (Branch: feature/anilist-api)
- * Default Homepage Catalog View for AniGraph powered by AniList GraphQL API
- * Renders dense anime cards (24 per batch) with AJAX pagination via "Charger plus d'animés".
+ * DiscoveryView.js
+ * Default Homepage Catalog View for SpiderAnime
+ * Renders dense anime cards with direct "+ Watchlist" actions and AJAX pagination.
  */
 
 import { getAnimeCatalog, getTopAnime } from '../services/aniListApi.js';
@@ -119,8 +119,13 @@ export class DiscoveryView {
                     <p class="font-label-mono text-[11px] text-outline mt-1">${genres || 'Anime'}</p>
                 </div>
 
-                <div class="flex gap-2 pt-2">
-                    <button class="btn-web flex-1 py-2 rounded-xl text-xs font-label-mono font-semibold bg-primary/20 text-primary border border-primary/40 hover:bg-primary hover:text-on-primary shadow-[0_0_10px_rgba(208,188,255,0.2)] transition-all flex items-center justify-center gap-1">
+                <div class="flex gap-2 pt-1">
+                    <button class="btn-watchlist flex-1 py-1.5 rounded-xl text-xs font-label-mono font-medium bg-surface-container border border-outline-variant/40 text-on-surface hover:border-secondary hover:text-secondary transition-all flex items-center justify-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+                        <span>+ Watchlist</span>
+                    </button>
+
+                    <button class="btn-web py-1.5 px-3 rounded-xl text-xs font-label-mono font-semibold bg-primary/20 text-primary border border-primary/40 hover:bg-primary hover:text-on-primary transition-all flex items-center justify-center gap-1">
                         <span class="material-symbols-outlined text-[16px]">polyline</span>
                         <span>Tisser</span>
                     </button>
@@ -138,6 +143,20 @@ export class DiscoveryView {
                 genres: (anime.genres || []).map(g => g.name || g)
             });
             graphStore.selectNode(addedNode.id);
+        });
+
+        const btnWatchlist = card.querySelector('.btn-watchlist');
+        btnWatchlist.addEventListener('click', (e) => {
+            e.stopPropagation();
+            graphStore.setWatchStatus({
+                id: `media_${anime.id}`,
+                mal_id: anime.id,
+                title: rawTitle,
+                image_url: anime.image_url,
+                score: anime.score,
+                genres: (anime.genres || []).map(g => g.name || g)
+            }, 'watching');
+            switchTab('watchlist');
         });
 
         const btnWeb = card.querySelector('.btn-web');
@@ -167,7 +186,7 @@ export class DiscoveryView {
         loadMoreContainer.innerHTML = `
             <button id="btn-trigger-ajax" class="px-8 py-3.5 rounded-2xl font-headline-md text-xs font-bold bg-surface-container-high hover:bg-primary hover:text-on-primary border border-outline-variant/40 hover:border-primary text-on-surface shadow-[0_0_20px_rgba(208,188,255,0.2)] transition-all flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-[20px]" id="ajax-icon">downloading</span>
-                <span id="ajax-text">Charger plus d'animés (AniList GraphQL)</span>
+                <span id="ajax-text">Charger plus d'animés</span>
             </button>
         `;
 
@@ -180,7 +199,7 @@ export class DiscoveryView {
             const icon = loadMoreContainer.querySelector('#ajax-icon');
             const text = loadMoreContainer.querySelector('#ajax-text');
             if (icon) icon.className = 'material-symbols-outlined text-[20px] animate-spin';
-            if (text) text.textContent = 'Chargement AniList GraphQL...';
+            if (text) text.textContent = 'Chargement en cours...';
 
             this.currentPage++;
             const newAnime = await getAnimeCatalog(this.currentPage, 24);
@@ -197,7 +216,7 @@ export class DiscoveryView {
 
             this.isLoadingMore = false;
             if (icon) icon.className = 'material-symbols-outlined text-[20px]';
-            if (text) text.textContent = 'Charger plus d\'animés (AniList GraphQL)';
+            if (text) text.textContent = 'Charger plus d\'animés';
         });
     }
 }
