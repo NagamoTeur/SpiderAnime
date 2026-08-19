@@ -1,0 +1,10 @@
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+.gemini
+README.md
+walkthrough.md
+implementation_plan.md
+stitch_anime_discovery_graph
