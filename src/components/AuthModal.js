@@ -15,14 +15,24 @@ export class AuthModal {
         this.activeTab = 'login';
         this.initialized = false;
 
+        // Global delegate listener to open Auth Modal from navbar button
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#btn-user-account')) {
+                this.open();
+            }
+        });
+
         authService.subscribe((user) => {
             this.updateNavbarUserBadge(user);
         });
     }
 
     ensureDOM() {
-        if (this.initialized) return true;
+        if (this.initialized && this.modal) return true;
         if (!document.body) return false;
+
+        const existingModal = document.getElementById('auth-modal');
+        if (existingModal) existingModal.remove();
 
         const modalHtml = `
             <div id="auth-modal" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xl flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
@@ -67,11 +77,6 @@ export class AuthModal {
 
         if (this.btnClose) {
             this.btnClose.addEventListener('click', () => this.close());
-        }
-
-        const accountBtn = document.getElementById('btn-user-account');
-        if (accountBtn) {
-            accountBtn.addEventListener('click', () => this.open());
         }
     }
 
@@ -138,8 +143,8 @@ export class AuthModal {
                         <span class="font-label-mono text-xs text-outline block mt-0.5">Nœuds sur la Toile</span>
                     </div>
                     <div class="border-l border-outline-variant/30">
-                        <span class="font-display-lg text-2xl font-bold text-tertiary">${snapshot.nodes.filter(n => n.isFavorite).length}</span>
-                        <span class="font-label-mono text-xs text-outline block mt-0.5">Animés Favoris</span>
+                        <span class="font-display-lg text-2xl font-bold text-tertiary">${snapshot.watchlist.length}</span>
+                        <span class="font-label-mono text-xs text-outline block mt-0.5">Animés en Watchlist</span>
                     </div>
                 </div>
 

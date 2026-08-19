@@ -1,11 +1,11 @@
 /**
- * AniList GraphQL API Client for AniGraph (Branch: feature/anilist-api)
+ * AniList GraphQL API Client for SpiderAnime
  * Replaces Jikan REST API with ultra-fast AniList v2 GraphQL Endpoint (https://graphql.anilist.co).
  * Provides single-query data fetching, high rate-limit tolerance, and rich recommendations.
  */
 
 const ANILIST_ENDPOINT = 'https://graphql.anilist.co';
-const CACHE_PREFIX = 'anigraph_anilist_cache_v1_';
+const CACHE_PREFIX = 'spideranime_anilist_cache_v2_';
 const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
 async function queryAniList(query, variables = {}) {
@@ -69,6 +69,8 @@ function normalizeAniListMedia(media) {
         trailerEmbed = `https://www.youtube.com/embed/${media.trailer.id}`;
     }
 
+    const imageCover = media.coverImage?.extraLarge || media.coverImage?.large || media.coverImage?.medium || 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-73ZaRwyTJQji.jpg';
+
     return {
         id: media.id,
         mal_id: media.idMal || media.id,
@@ -79,11 +81,11 @@ function normalizeAniListMedia(media) {
         episodes: media.episodes || 12,
         status: media.status || 'FINISHED',
         synopsis: media.description ? media.description.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '') : 'Aucun synopsis disponible.',
-        image_url: media.coverImage?.extraLarge || media.coverImage?.large || media.coverImage?.medium || '',
+        image_url: imageCover,
         images: {
             jpg: {
-                image_url: media.coverImage?.large || media.coverImage?.medium || '',
-                large_image_url: media.coverImage?.extraLarge || media.coverImage?.large || ''
+                image_url: imageCover,
+                large_image_url: imageCover
             }
         },
         banner_image: media.bannerImage || '',
@@ -100,9 +102,6 @@ function normalizeAniListMedia(media) {
     };
 }
 
-/**
- * Fetch catalog of top & trending anime via GraphQL
- */
 export async function getAnimeCatalog(page = 1, perPage = 24) {
     const cacheKey = `catalog_p${page}_l${perPage}`;
 
@@ -151,13 +150,9 @@ export async function getAnimeCatalog(page = 1, perPage = 24) {
     return STARTER_ANIME_DATA;
 }
 
-/**
- * Search anime using GraphQL
- */
 export async function searchAnime(queryStr, page = 1, perPage = 20) {
     if (!queryStr || queryStr.trim().length < 2) return [];
     const sanitized = queryStr.trim();
-    const cacheKey = `search_${sanitized.toLowerCase()}_p${page}`;
 
     try {
         const query = `
@@ -199,9 +194,6 @@ export async function searchAnime(queryStr, page = 1, perPage = 20) {
     }
 }
 
-/**
- * Fetch full details for an anime by ID
- */
 export async function getAnimeDetails(animeId) {
     if (!animeId) return null;
     const cacheKey = `details_${animeId}`;
@@ -263,9 +255,6 @@ export async function getAnimeDetails(animeId) {
     return STARTER_ANIME_DATA.find(a => a.mal_id === Number(animeId) || a.id === Number(animeId)) || null;
 }
 
-/**
- * Fetch recommendations for an anime
- */
 export async function getAnimeRecommendations(animeId) {
     const details = await getAnimeDetails(animeId);
     if (details && details.recommendations && details.recommendations.length > 0) {
@@ -284,9 +273,6 @@ export async function getAnimeRecommendations(animeId) {
         }));
 }
 
-/**
- * Fetch Top/Trending anime for the Trending view
- */
 export async function getTopAnime(limit = 35) {
     return getAnimeCatalog(1, limit);
 }
@@ -301,8 +287,8 @@ export const STARTER_ANIME_DATA = [
         status: "FINISHED",
         episodes: 37,
         synopsis: "Light Yagami finds a notebook capable of killing anyone whose name is written in it.",
-        image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx1535-lawlhhhwLi1e.png",
-        images: { jpg: { image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx1535-lawlhhhwLi1e.png" } },
+        image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1535-er0fWwv64a6c.jpg",
+        images: { jpg: { image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1535-er0fWwv64a6c.jpg" } },
         genres: [{ name: "Psychological" }, { name: "Supernatural" }],
         studios: [{ name: "Madhouse" }]
     },
@@ -315,8 +301,8 @@ export const STARTER_ANIME_DATA = [
         status: "FINISHED",
         episodes: 25,
         synopsis: "Humanity fights for survival against giant humanoid Titans.",
-        image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx16498-73ZaRwyTJQji.jpg",
-        images: { jpg: { image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx16498-73ZaRwyTJQji.jpg" } },
+        image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-73ZaRwyTJQji.jpg",
+        images: { jpg: { image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-73ZaRwyTJQji.jpg" } },
         genres: [{ name: "Action" }, { name: "Dark Fantasy" }],
         studios: [{ name: "WIT Studio" }]
     },
@@ -329,8 +315,8 @@ export const STARTER_ANIME_DATA = [
         status: "FINISHED",
         episodes: 11,
         synopsis: "Reborn as idol twins navigating the showbiz world.",
-        image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx150672-wHsf93b7wKnh.jpg",
-        images: { jpg: { image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx150672-wHsf93b7wKnh.jpg" } },
+        image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx150672-wHsf93b7wKnh.jpg",
+        images: { jpg: { image_url: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx150672-wHsf93b7wKnh.jpg" } },
         genres: [{ name: "Drama" }, { name: "Supernatural" }],
         studios: [{ name: "Doga Kobo" }]
     }

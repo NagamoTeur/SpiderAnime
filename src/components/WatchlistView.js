@@ -152,9 +152,11 @@ export class WatchlistView {
         }
 
         return `
-            <div class="glass-card rounded-2xl p-4 border border-outline-variant/30 hover:border-primary/40 transition-all flex flex-col justify-between space-y-4 watchlist-card group" data-id="${node.id}">
+            <div class="glass-card rounded-2xl p-4 border border-outline-variant/30 hover:border-primary/40 transition-all flex flex-col justify-between space-y-4 watchlist-card group overflow-hidden" data-id="${node.id}">
                 <div class="flex items-start gap-4">
-                    <img src="${img}" alt="${title}" class="w-16 h-22 object-cover rounded-xl border border-outline-variant/40 shadow-md flex-shrink-0 group-hover:scale-105 transition-transform" />
+                    <div class="w-16 h-24 flex-shrink-0 bg-surface-container-high rounded-xl overflow-hidden border border-outline-variant/40 shadow-md relative">
+                        <img src="${img}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition-transform" onerror="this.onerror=null; this.src='https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx16498-73ZaRwyTJQji.jpg';" />
+                    </div>
                     
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center justify-between gap-1 mb-1">
