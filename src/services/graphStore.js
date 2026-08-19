@@ -1,14 +1,13 @@
 /**
- * Graph Store & State Manager for AniGraph
- * Manages nodes, spider-web links, recommendations, PER-USER persistence,
- * Pokédex Watch Tracking, and Anamorphosis gravitational metrics.
+ * Graph Store & State Manager for AniGraph (Branch: feature/anilist-api)
+ * Powered by AniList GraphQL API.
  */
 
-import { getAnimeRecommendations, STARTER_ANIME_DATA } from './jikanApi.js';
+import { getAnimeRecommendations, STARTER_ANIME_DATA } from './aniListApi.js';
 import { authService } from './authService.js';
 import { RecommendationEngine } from './recommendationEngine.js';
 
-const STORAGE_PREFIX = 'anigraph_spider_data_';
+const STORAGE_PREFIX = 'anigraph_spider_data_anilist_';
 
 class GraphStore {
     constructor() {
@@ -83,7 +82,7 @@ class GraphStore {
             const saved = localStorage.getItem(key);
             if (saved) {
                 const { nodes, links } = JSON.parse(saved);
-                if (nodes) {
+                if (nodes && nodes.length > 0) {
                     this.nodes = nodes;
                     this.links = links || [];
                     this.notify();
@@ -101,22 +100,21 @@ class GraphStore {
         this.nodes = [];
         this.links = [];
 
-        const aot = STARTER_ANIME_DATA[3];
-        const frieren = STARTER_ANIME_DATA[5];
-        const demonSlayer = STARTER_ANIME_DATA[10];
-        const jujutsu = STARTER_ANIME_DATA[11];
-        const cyberpunk = STARTER_ANIME_DATA[12];
+        const dn = STARTER_ANIME_DATA[0];
+        const aot = STARTER_ANIME_DATA[1];
+        const oshi = STARTER_ANIME_DATA[2];
 
         this.addNode({
-            mal_id: aot.mal_id,
+            mal_id: aot.id,
+            id: `media_${aot.id}`,
             title: aot.title_english || aot.title,
-            image_url: aot.images.jpg.image_url,
+            image_url: aot.image_url,
             score: aot.score,
             isFavorite: true,
             isRoot: true,
             watchStatus: 'completed',
-            watchedEpisodes: aot.episodes || 25,
-            totalEpisodes: aot.episodes || 25,
+            watchedEpisodes: 25,
+            totalEpisodes: 25,
             genres: aot.genres.map(g => g.name || g),
             relevancePct: 100,
             anamorphScale: 1.2,
@@ -125,93 +123,58 @@ class GraphStore {
         });
 
         this.addNode({
-            mal_id: frieren.mal_id,
-            title: frieren.title_english || frieren.title,
-            image_url: frieren.images.jpg.image_url,
-            score: frieren.score,
+            mal_id: dn.id,
+            id: `media_${dn.id}`,
+            title: dn.title_english || dn.title,
+            image_url: dn.image_url,
+            score: dn.score,
             isFavorite: true,
-            watchStatus: 'watching',
-            watchedEpisodes: 18,
-            totalEpisodes: 28,
-            genres: frieren.genres.map(g => g.name || g),
-            relevancePct: 92,
+            watchStatus: 'completed',
+            watchedEpisodes: 37,
+            totalEpisodes: 37,
+            genres: dn.genres.map(g => g.name || g),
+            relevancePct: 90,
             anamorphScale: 1.1,
-            x: 170,
-            y: -100
+            x: 180,
+            y: -110
         });
 
         this.addNode({
-            mal_id: demonSlayer.mal_id,
-            title: demonSlayer.title_english || demonSlayer.title,
-            image_url: demonSlayer.images.jpg.image_url,
-            score: demonSlayer.score,
+            mal_id: oshi.id,
+            id: `media_${oshi.id}`,
+            title: oshi.title_english || oshi.title,
+            image_url: oshi.image_url,
+            score: oshi.score,
             isFavorite: false,
-            watchStatus: 'plan_to_watch',
-            watchedEpisodes: 0,
-            totalEpisodes: 26,
-            genres: demonSlayer.genres.map(g => g.name || g),
+            watchStatus: 'watching',
+            watchedEpisodes: 6,
+            totalEpisodes: 11,
+            genres: oshi.genres.map(g => g.name || g),
             relevancePct: 88,
             anamorphScale: 1.05,
-            x: -180,
-            y: 140
+            x: -190,
+            y: 130
         });
 
-        this.addNode({
-            mal_id: jujutsu.mal_id,
-            title: jujutsu.title_english || jujutsu.title,
-            image_url: jujutsu.images.jpg.image_url,
-            score: jujutsu.score,
-            isFavorite: false,
-            watchStatus: 'plan_to_watch',
-            watchedEpisodes: 0,
-            totalEpisodes: 24,
-            genres: jujutsu.genres.map(g => g.name || g),
-            relevancePct: 85,
-            anamorphScale: 1.0,
-            x: 160,
-            y: 150
-        });
+        const aotId = `media_${aot.id}`;
+        const dnId = `media_${dn.id}`;
+        const oshiId = `media_${oshi.id}`;
 
-        this.addNode({
-            mal_id: cyberpunk.mal_id,
-            title: cyberpunk.title_english || cyberpunk.title,
-            image_url: cyberpunk.images.jpg.image_url,
-            score: cyberpunk.score,
-            isFavorite: false,
-            watchStatus: 'completed',
-            watchedEpisodes: 10,
-            totalEpisodes: 10,
-            genres: cyberpunk.genres.map(g => g.name || g),
-            relevancePct: 78,
-            anamorphScale: 0.95,
-            x: -210,
-            y: -120
-        });
-
-        const aotId = `mal_${aot.mal_id}`;
-        const frierenId = `mal_${frieren.mal_id}`;
-        const dsId = `mal_${demonSlayer.mal_id}`;
-        const jjId = `mal_${jujutsu.mal_id}`;
-        const cbId = `mal_${cyberpunk.mal_id}`;
-
-        this.addLink(aotId, frierenId, 'recommendation', 92);
-        this.addLink(aotId, dsId, 'recommendation', 88);
-        this.addLink(aotId, jjId, 'recommendation', 85);
-        this.addLink(dsId, jjId, 'similarity', 90);
-        this.addLink(aotId, cbId, 'recommendation', 78);
+        this.addLink(aotId, dnId, 'recommendation', 90);
+        this.addLink(aotId, oshiId, 'recommendation', 88);
 
         this.save();
         this.notify();
     }
 
     addNode(anime) {
-        const id = `mal_${anime.mal_id}`;
+        const id = anime.id || `media_${anime.mal_id || anime.id}`;
         let existing = this.nodes.find(n => n.id === id);
 
         if (!existing) {
             existing = {
                 id,
-                mal_id: anime.mal_id,
+                mal_id: anime.mal_id || anime.id,
                 title: anime.title || anime.title_english,
                 image_url: anime.image_url || anime.images?.jpg?.image_url || '',
                 score: anime.score || 8.0,
@@ -299,7 +262,7 @@ class GraphStore {
         node.expanded = true;
 
         try {
-            const recs = await getAnimeRecommendations(node.mal_id);
+            const recs = await getAnimeRecommendations(node.mal_id || node.id);
             const count = Math.min(recs.length, 10);
             const angleStep = (Math.PI * 2) / count;
 
@@ -311,10 +274,11 @@ class GraphStore {
                 const radius = rel.distance;
 
                 const recNode = this.addNode({
-                    mal_id: rec.mal_id,
+                    mal_id: rec.mal_id || rec.id,
+                    id: `media_${rec.mal_id || rec.id}`,
                     title: rec.title,
                     image_url: rec.image_url,
-                    score: 7.5 + (Math.random() * 1.5),
+                    score: 7.8 + (Math.random() * 1.5),
                     isFavorite: false,
                     watchStatus: 'plan_to_watch',
                     relevancePct: rel.scorePct,

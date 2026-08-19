@@ -1,10 +1,10 @@
 /**
- * DiscoveryView.js
- * Default Homepage Catalog View for AniGraph
- * Renders dense anime cards (50 per batch) with AJAX pagination via "Charger plus d'animés".
+ * DiscoveryView.js (Branch: feature/anilist-api)
+ * Default Homepage Catalog View for AniGraph powered by AniList GraphQL API
+ * Renders dense anime cards (24 per batch) with AJAX pagination via "Charger plus d'animés".
  */
 
-import { getAnimeCatalog, getTopAnime } from '../services/jikanApi.js';
+import { getAnimeCatalog, getTopAnime } from '../services/aniListApi.js';
 import { graphStore } from '../services/graphStore.js';
 import { switchTab } from './Navbar.js';
 import { escapeHTML } from '../utils/security.js';
@@ -25,8 +25,7 @@ export class DiscoveryView {
         if (!this.container) return;
         this.renderSkeleton();
 
-        // Initial catalog load: 35-50 items
-        const initialBatch = await getTopAnime(35);
+        const initialBatch = await getAnimeCatalog(1, 24);
         this.allAnime = initialBatch;
         this.renderGrid(this.allAnime);
         this.appendLoadMoreButton();
@@ -101,7 +100,7 @@ export class DiscoveryView {
 
         const rawTitle = anime.title_english || anime.title;
         const title = escapeHTML(rawTitle);
-        const imageUrl = escapeHTML(anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url);
+        const imageUrl = escapeHTML(anime.image_url || anime.images?.jpg?.large_image_url);
         const score = anime.score ? `★ ${anime.score}` : 'N/A';
         const genres = escapeHTML((anime.genres || []).slice(0, 2).map(g => g.name || g).join(' • '));
 
@@ -131,9 +130,10 @@ export class DiscoveryView {
 
         card.addEventListener('click', () => {
             const addedNode = graphStore.addNode({
-                mal_id: anime.mal_id,
+                id: `media_${anime.id}`,
+                mal_id: anime.id,
                 title: rawTitle,
-                image_url: anime.images?.jpg?.image_url,
+                image_url: anime.image_url,
                 score: anime.score,
                 genres: (anime.genres || []).map(g => g.name || g)
             });
@@ -144,9 +144,10 @@ export class DiscoveryView {
         btnWeb.addEventListener('click', (e) => {
             e.stopPropagation();
             graphStore.addFavorite({
-                mal_id: anime.mal_id,
+                id: `media_${anime.id}`,
+                mal_id: anime.id,
                 title: rawTitle,
-                image_url: anime.images?.jpg?.image_url,
+                image_url: anime.image_url,
                 score: anime.score,
                 genres: (anime.genres || []).map(g => g.name || g)
             });
@@ -166,7 +167,7 @@ export class DiscoveryView {
         loadMoreContainer.innerHTML = `
             <button id="btn-trigger-ajax" class="px-8 py-3.5 rounded-2xl font-headline-md text-xs font-bold bg-surface-container-high hover:bg-primary hover:text-on-primary border border-outline-variant/40 hover:border-primary text-on-surface shadow-[0_0_20px_rgba(208,188,255,0.2)] transition-all flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-[20px]" id="ajax-icon">downloading</span>
-                <span id="ajax-text">Charger plus d'animés</span>
+                <span id="ajax-text">Charger plus d'animés (AniList GraphQL)</span>
             </button>
         `;
 
@@ -179,14 +180,14 @@ export class DiscoveryView {
             const icon = loadMoreContainer.querySelector('#ajax-icon');
             const text = loadMoreContainer.querySelector('#ajax-text');
             if (icon) icon.className = 'material-symbols-outlined text-[20px] animate-spin';
-            if (text) text.textContent = 'Chargement en cours...';
+            if (text) text.textContent = 'Chargement AniList GraphQL...';
 
             this.currentPage++;
-            const newAnime = await getAnimeCatalog(this.currentPage);
+            const newAnime = await getAnimeCatalog(this.currentPage, 24);
 
             if (newAnime.length > 0) {
                 newAnime.forEach(anime => {
-                    if (!this.allAnime.some(a => a.mal_id === anime.mal_id)) {
+                    if (!this.allAnime.some(a => a.id === anime.id)) {
                         this.allAnime.push(anime);
                         const card = this.createAnimeCardDOM(anime);
                         this.container.appendChild(card);
@@ -196,7 +197,7 @@ export class DiscoveryView {
 
             this.isLoadingMore = false;
             if (icon) icon.className = 'material-symbols-outlined text-[20px]';
-            if (text) text.textContent = 'Charger plus d\'animés';
+            if (text) text.textContent = 'Charger plus d\'animés (AniList GraphQL)';
         });
     }
 }

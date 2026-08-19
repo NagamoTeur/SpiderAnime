@@ -1,9 +1,9 @@
 /**
- * TrendingView.js
- * Dedicated view for Trending & Seasonal Top Rated Anime with Hero Banner & TOP 10 Ranking.
+ * TrendingView.js (Branch: feature/anilist-api)
+ * Dedicated view for Trending & Seasonal Top Rated Anime powered by AniList GraphQL API.
  */
 
-import { getTopAnime } from '../services/jikanApi.js';
+import { getTopAnime } from '../services/aniListApi.js';
 import { graphStore } from '../services/graphStore.js';
 import { switchTab } from './Navbar.js';
 import { escapeHTML } from '../utils/security.js';
@@ -43,7 +43,7 @@ export class TrendingView {
         const rest = this.topAnime.slice(1);
 
         const heroTitle = escapeHTML(hero.title_english || hero.title);
-        const heroPoster = escapeHTML(hero.images?.jpg?.large_image_url || hero.images?.jpg?.image_url);
+        const heroPoster = escapeHTML(hero.image_url || hero.images?.jpg?.large_image_url);
         const heroScore = hero.score ? `★ ${hero.score}` : '★ 9.0';
         const heroSynopsis = escapeHTML(hero.synopsis ? hero.synopsis.substring(0, 200) + '...' : '');
 
@@ -54,9 +54,9 @@ export class TrendingView {
                         <div class="w-8 h-8 rounded-xl bg-tertiary/20 text-tertiary flex items-center justify-center border border-tertiary/40">
                             <span class="material-symbols-outlined text-[20px]">local_fire_department</span>
                         </div>
-                        <h1 class="font-display-lg text-3xl md:text-4xl font-bold text-on-surface tracking-tight">Tendances & Top Classement</h1>
+                        <h1 class="font-display-lg text-3xl md:text-4xl font-bold text-on-surface tracking-tight">Tendances & Top Classement (AniList)</h1>
                     </div>
-                    <p class="text-on-surface-variant text-sm mt-1">Les chefs-d'œuvre les plus plébiscités par la communauté à ajouter à votre toile.</p>
+                    <p class="text-on-surface-variant text-sm mt-1">Les chefs-d'œuvre les plus plébiscités récupérés en temps réel via l'API GraphQL AniList.</p>
                 </div>
 
                 <div class="relative rounded-3xl overflow-hidden border border-tertiary/40 bg-surface-container/80 shadow-[0_0_30px_rgba(78,222,163,0.15)] group">
@@ -99,12 +99,12 @@ export class TrendingView {
                         ${rest.slice(0, 9).map((anime, idx) => {
                             const rank = idx + 2;
                             const title = escapeHTML(anime.title_english || anime.title);
-                            const img = escapeHTML(anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url);
+                            const img = escapeHTML(anime.image_url || anime.images?.jpg?.large_image_url);
                             const score = anime.score ? `★ ${anime.score}` : 'N/A';
                             const genres = escapeHTML((anime.genres || []).slice(0, 2).map(g => g.name || g).join(' • '));
 
                             return `
-                                <div class="glass-card rounded-2xl p-4 flex items-center gap-4 border border-outline-variant/30 hover:border-secondary/50 transition-all group cursor-pointer trending-card" data-mal-id="${anime.mal_id}">
+                                <div class="glass-card rounded-2xl p-4 flex items-center gap-4 border border-outline-variant/30 hover:border-secondary/50 transition-all group cursor-pointer trending-card" data-mal-id="${anime.id}">
                                     <div class="relative w-20 h-28 flex-shrink-0 rounded-xl overflow-hidden shadow-md">
                                         <img src="${img}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                                         <span class="absolute top-1 left-1 bg-surface/80 backdrop-blur-md text-white font-label-mono text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/20">
@@ -135,9 +135,10 @@ export class TrendingView {
 
         this.container.querySelector('#btn-hero-web')?.addEventListener('click', () => {
             graphStore.addFavorite({
-                mal_id: hero.mal_id,
+                id: `media_${hero.id}`,
+                mal_id: hero.id,
                 title: hero.title_english || hero.title,
-                image_url: hero.images?.jpg?.image_url,
+                image_url: hero.image_url,
                 score: hero.score,
                 genres: (hero.genres || []).map(g => g.name || g)
             });
@@ -150,9 +151,10 @@ export class TrendingView {
 
             card.addEventListener('click', () => {
                 const addedNode = graphStore.addNode({
-                    mal_id: anime.mal_id,
+                    id: `media_${anime.id}`,
+                    mal_id: anime.id,
                     title: anime.title_english || anime.title,
-                    image_url: anime.images?.jpg?.image_url,
+                    image_url: anime.image_url,
                     score: anime.score,
                     genres: (anime.genres || []).map(g => g.name || g)
                 });
@@ -162,9 +164,10 @@ export class TrendingView {
             card.querySelector('.btn-trending-web')?.addEventListener('click', (e) => {
                 e.stopPropagation();
                 graphStore.addFavorite({
-                    mal_id: anime.mal_id,
+                    id: `media_${anime.id}`,
+                    mal_id: anime.id,
                     title: anime.title_english || anime.title,
-                    image_url: anime.images?.jpg?.image_url,
+                    image_url: anime.image_url,
                     score: anime.score,
                     genres: (anime.genres || []).map(g => g.name || g)
                 });

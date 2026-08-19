@@ -1,11 +1,10 @@
 /**
- * AnimeDetailSidebar.js
- * Glassmorphic slide-out sidebar with Pokédex Watch Tracker & Episode Counter,
- * on-demand trailer player, custom confirmation deletion, and recommendation branching.
+ * AnimeDetailSidebar.js (Branch: feature/anilist-api)
+ * Glassmorphic slide-out sidebar powered by AniList GraphQL API with Pokédex Watch Tracker.
  */
 
 import { graphStore } from '../services/graphStore.js';
-import { getAnimeDetails, getAnimeRecommendations } from '../services/jikanApi.js';
+import { getAnimeDetails, getAnimeRecommendations } from '../services/aniListApi.js';
 import { confirmModal } from './ConfirmModal.js';
 import { escapeHTML } from '../utils/security.js';
 
@@ -52,7 +51,8 @@ export class AnimeDetailSidebar {
 
     async loadAnimeDetails(node) {
         if (!this.content) return;
-        this.currentMalId = node.mal_id;
+        const targetId = node.mal_id || node.id;
+        this.currentMalId = targetId;
 
         this.content.innerHTML = `
             <div class="animate-pulse space-y-4">
@@ -63,19 +63,19 @@ export class AnimeDetailSidebar {
             </div>
         `;
 
-        const details = await getAnimeDetails(node.mal_id);
-        const recommendations = await getAnimeRecommendations(node.mal_id);
+        const details = await getAnimeDetails(targetId);
+        const recommendations = await getAnimeRecommendations(targetId);
 
-        if (this.currentMalId !== node.mal_id) return;
+        if (this.currentMalId !== targetId) return;
 
         const rawTitle = details?.title_english || details?.title || node.title;
         const title = escapeHTML(rawTitle);
         const jpTitle = escapeHTML(details?.title_japanese || '');
-        const posterUrl = escapeHTML(details?.images?.jpg?.large_image_url || node.image_url);
+        const posterUrl = escapeHTML(details?.image_url || details?.images?.jpg?.large_image_url || node.image_url);
         const score = details?.score || node.score || 'N/A';
         const totalEp = details?.episodes || node.totalEpisodes || 12;
         const episodesText = escapeHTML(totalEp ? `${totalEp} épisodes` : 'Épisodes inconnu');
-        const statusText = escapeHTML(details?.status || 'Inconnu');
+        const statusText = escapeHTML(details?.status || 'FINISHED');
         const studio = escapeHTML(details?.studios?.[0]?.name || 'Studio inconnu');
         const synopsis = escapeHTML(details?.synopsis || 'Aucun synopsis disponible pour cet animé.');
         
@@ -95,7 +95,6 @@ export class AnimeDetailSidebar {
         const progressPct = Math.min(100, Math.round((watchedEp / (totalEp || 1)) * 100));
 
         this.content.innerHTML = `
-            <!-- Top Hero Banner -->
             <div class="relative rounded-2xl overflow-hidden border border-outline-variant/40 group shadow-xl">
                 <img src="${posterUrl}" alt="${title}" class="w-full h-56 object-cover object-center group-hover:scale-105 transition-transform duration-500" />
                 <div class="absolute inset-0 bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/60 to-transparent"></div>
@@ -111,7 +110,6 @@ export class AnimeDetailSidebar {
                 </div>
             </div>
 
-            <!-- Pokédex Watch Status Tracker -->
             <div class="p-4 rounded-2xl bg-surface-container/70 border border-outline-variant/40 space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="font-label-mono text-xs text-secondary font-semibold uppercase flex items-center gap-1.5">
@@ -121,7 +119,6 @@ export class AnimeDetailSidebar {
                     <span class="font-label-mono text-[11px] text-outline">${watchedEp} / ${totalEp} ép</span>
                 </div>
 
-                <!-- Status Tabs -->
                 <div class="grid grid-cols-3 gap-1.5 bg-surface-container-high/50 p-1 rounded-xl">
                     <button class="status-btn py-1.5 rounded-lg text-[11px] font-label-mono font-medium transition-all ${
                         watchStatus === 'watching' ? 'bg-secondary text-on-secondary font-bold shadow' : 'text-outline hover:text-on-surface'
@@ -136,7 +133,6 @@ export class AnimeDetailSidebar {
                     }" data-status="plan_to_watch">🟡 À voir</button>
                 </div>
 
-                <!-- Episode Progress Counter -->
                 <div class="flex items-center justify-between pt-1">
                     <span class="font-label-mono text-xs text-on-surface">Avancement épisodes :</span>
                     <div class="flex items-center gap-2">
@@ -146,13 +142,11 @@ export class AnimeDetailSidebar {
                     </div>
                 </div>
 
-                <!-- Progress Bar -->
                 <div class="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
                     <div class="h-full bg-gradient-to-r from-secondary to-tertiary transition-all duration-300" style="width: ${progressPct}%"></div>
                 </div>
             </div>
 
-            <!-- Action Buttons Row 1 -->
             <div class="flex gap-2">
                 <button id="btn-toggle-fav" class="flex-1 py-2.5 rounded-xl font-headline-md text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                     isFavorite 
@@ -169,7 +163,6 @@ export class AnimeDetailSidebar {
                 </button>
             </div>
 
-            <!-- Action Buttons Row 2: Remove Node -->
             <div>
                 <button id="btn-remove-node" class="w-full py-2.5 rounded-xl font-headline-md text-xs font-semibold bg-error/10 text-error border border-error/30 hover:bg-error/20 transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">delete</span>
@@ -177,7 +170,6 @@ export class AnimeDetailSidebar {
                 </button>
             </div>
 
-            <!-- Specs Grid -->
             <div class="grid grid-cols-3 gap-2 p-3 rounded-xl bg-surface-container/60 border border-outline-variant/30 text-center font-label-mono text-xs">
                 <div>
                     <span class="text-outline text-[10px] uppercase block">Studio</span>
@@ -193,7 +185,6 @@ export class AnimeDetailSidebar {
                 </div>
             </div>
 
-            <!-- Genres Tag Cloud -->
             <div>
                 <h4 class="font-label-mono text-xs text-outline uppercase mb-2">Genres</h4>
                 <div class="flex flex-wrap gap-1.5">
@@ -205,7 +196,6 @@ export class AnimeDetailSidebar {
                 </div>
             </div>
 
-            <!-- Synopsis -->
             <div>
                 <h4 class="font-label-mono text-xs text-outline uppercase mb-2">Synopsis</h4>
                 <p class="text-sm text-on-surface-variant leading-relaxed font-body-md bg-surface-container/40 p-4 rounded-xl border border-outline-variant/20">
@@ -213,7 +203,6 @@ export class AnimeDetailSidebar {
                 </p>
             </div>
 
-            <!-- Trailer Video -->
             ${trailerEmbedUrl ? `
                 <div>
                     <h4 class="font-label-mono text-xs text-outline uppercase mb-2">Bande-Annonce</h4>
@@ -228,20 +217,19 @@ export class AnimeDetailSidebar {
                 </div>
             ` : ''}
 
-            <!-- Connected Recommendations -->
             <div>
                 <h4 class="font-label-mono text-xs text-secondary uppercase mb-3 flex items-center justify-between">
-                    <span>Animés Suggérés (Toile)</span>
+                    <span>Animés Suggérés (AniList Toile)</span>
                     <span class="text-[10px] text-outline">${recommendations.length} filons</span>
                 </h4>
                 <div class="space-y-2">
                     ${recommendations.map(rec => `
-                        <div class="rec-item flex items-center justify-between p-2.5 rounded-xl bg-surface-container/50 hover:bg-surface-container-high border border-outline-variant/30 transition-all cursor-pointer group" data-mal-id="${rec.mal_id}">
+                        <div class="rec-item flex items-center justify-between p-2.5 rounded-xl bg-surface-container/50 hover:bg-surface-container-high border border-outline-variant/30 transition-all cursor-pointer group" data-mal-id="${rec.id || rec.mal_id}">
                             <div class="flex items-center gap-3">
                                 <img src="${escapeHTML(rec.image_url)}" alt="${escapeHTML(rec.title)}" class="w-10 h-12 object-cover rounded-lg" />
                                 <div>
                                     <h5 class="text-xs font-semibold text-on-surface group-hover:text-secondary transition-colors line-clamp-1">${escapeHTML(rec.title)}</h5>
-                                    <span class="text-[10px] font-label-mono text-outline">${rec.votes} avis positifs</span>
+                                    <span class="text-[10px] font-label-mono text-outline">${rec.votes} votes d'affinité</span>
                                 </div>
                             </div>
                             <span class="material-symbols-outlined text-outline group-hover:text-secondary text-[18px]">add_circle</span>
@@ -251,7 +239,6 @@ export class AnimeDetailSidebar {
             </div>
         `;
 
-        // Bind Pokédex Status buttons
         this.content.querySelectorAll('.status-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const newStatus = btn.dataset.status;
@@ -261,7 +248,6 @@ export class AnimeDetailSidebar {
             });
         });
 
-        // Bind Episode Counter [-] and [+]
         const btnMinus = this.content.querySelector('#btn-ep-minus');
         const btnPlus = this.content.querySelector('#btn-ep-plus');
 
@@ -275,7 +261,6 @@ export class AnimeDetailSidebar {
             graphStore.updateWatchProgress(node.id, watchStatus, newEp);
         });
 
-        // Bind Actions
         const btnToggleFav = this.content.querySelector('#btn-toggle-fav');
         const btnExpandWeb = this.content.querySelector('#btn-expand-web');
         const btnRemoveNode = this.content.querySelector('#btn-remove-node');
@@ -307,12 +292,13 @@ export class AnimeDetailSidebar {
 
         this.content.querySelectorAll('.rec-item').forEach(item => {
             item.addEventListener('click', () => {
-                const malId = Number(item.dataset.malId);
+                const recId = Number(item.dataset.malId);
                 const recTitle = item.querySelector('h5').textContent;
                 const img = item.querySelector('img').src;
 
                 const addedNode = graphStore.addNode({
-                    mal_id: malId,
+                    id: `media_${recId}`,
+                    mal_id: recId,
                     title: recTitle,
                     image_url: img,
                     score: 8.0

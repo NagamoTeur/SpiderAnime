@@ -1,10 +1,9 @@
 /**
- * SearchModal.js
- * CMD + K Search Terminal for AniGraph
- * Real-time Jikan API search with instant node addition & automatic tab switching to Graph.
+ * SearchModal.js (Branch: feature/anilist-api)
+ * CMD + K Search Terminal for AniGraph powered by AniList GraphQL API
  */
 
-import { searchAnime } from '../services/jikanApi.js';
+import { searchAnime } from '../services/aniListApi.js';
 import { graphStore } from '../services/graphStore.js';
 import { switchTab } from './Navbar.js';
 import { escapeHTML } from '../utils/security.js';
@@ -57,7 +56,7 @@ export class SearchModal {
                 this.spinner?.classList.remove('hidden');
                 this.debounceTimer = setTimeout(() => {
                     this.performSearch(query);
-                }, 300);
+                }, 200);
             });
         }
     }
@@ -92,7 +91,7 @@ export class SearchModal {
             this.resultsList.innerHTML = `
                 <div class="text-center py-12 text-outline font-label-mono text-sm">
                     <span class="material-symbols-outlined text-3xl mb-2 block opacity-40">manage_search</span>
-                    Saisissez au moins 2 caractères (ex: Oshi no Ko, Naruto, Solo Leveling)...
+                    Saisissez au moins 2 caractères (ex: Death Note, Attack on Titan, Solo Leveling)...
                 </div>
             `;
         }
@@ -134,7 +133,7 @@ export class SearchModal {
 
             const rawTitle = anime.title_english || anime.title;
             const title = escapeHTML(rawTitle);
-            const imageUrl = escapeHTML(anime.images?.jpg?.image_url || '');
+            const imageUrl = escapeHTML(anime.image_url || '');
             const score = anime.score ? `★ ${anime.score}` : 'N/A';
             const genres = escapeHTML((anime.genres || []).slice(0, 2).map(g => g.name || g).join(' • '));
 
@@ -161,9 +160,10 @@ export class SearchModal {
 
             item.addEventListener('click', () => {
                 const addedNode = graphStore.addNode({
-                    mal_id: anime.mal_id,
+                    id: `media_${anime.id}`,
+                    mal_id: anime.id,
                     title: rawTitle,
-                    image_url: anime.images?.jpg?.image_url,
+                    image_url: anime.image_url,
                     score: anime.score,
                     genres: (anime.genres || []).map(g => g.name || g)
                 });
@@ -175,9 +175,10 @@ export class SearchModal {
             btnAdd.addEventListener('click', (e) => {
                 e.stopPropagation();
                 graphStore.addFavorite({
-                    mal_id: anime.mal_id,
+                    id: `media_${anime.id}`,
+                    mal_id: anime.id,
                     title: rawTitle,
-                    image_url: anime.images?.jpg?.image_url,
+                    image_url: anime.image_url,
                     score: anime.score,
                     genres: (anime.genres || []).map(g => g.name || g)
                 });
