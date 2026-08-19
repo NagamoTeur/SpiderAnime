@@ -1,5 +1,5 @@
 /**
- * Main.js - AniGraph Entry Point
+ * Main.js - SpiderAnime Entry Point
  * Wires together WebGL shader background, D3 canvas engine, auth service,
  * per-user graph store, 3 distinct views (Graph, Discovery, Trending), and modals.
  * Default initial home view: Découverte.
@@ -74,9 +74,9 @@ async function startApp() {
             () => searchModal.open()
         );
 
-        console.log('[AniGraph] Application initialized with Découverte as default home page.');
+        console.log('[SpiderAnime] Application initialized with Découverte as default home page.');
     } catch (err) {
-        console.error('[AniGraph Initialization Error]:', err);
+        console.error('[SpiderAnime Initialization Error]:', err);
     }
 }
 
