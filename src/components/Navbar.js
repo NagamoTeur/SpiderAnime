@@ -1,7 +1,7 @@
 /**
  * Navbar.js
- * Controls 3-view navigation switches (Toile, Découverte, Tendances),
- * Pokédex watch stats, and programmatic tab switching.
+ * Controls 3-view navigation switches (Découverte, Toile, Tendances),
+ * Pokédex watch stats, and programmatic tab switching. Default: Découverte.
  */
 
 import { graphStore } from '../services/graphStore.js';
@@ -22,7 +22,7 @@ export function initNavbar(onViewChange, onSearchOpen) {
     const brandLogo = document.getElementById('brand-logo');
     const statNodeCount = document.getElementById('stat-node-count');
 
-    let activeTab = 'graph';
+    let activeTab = 'discover';
 
     const updateActiveTab = (tabName) => {
         activeTab = tabName;
@@ -32,10 +32,10 @@ export function initNavbar(onViewChange, onSearchOpen) {
             btn.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 text-on-surface-variant hover:text-on-surface hover:bg-white/5";
         });
 
-        if (tabName === 'graph' && btnGraph) {
-            btnGraph.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-primary/20 text-primary border border-primary/40 shadow-[0_0_10px_rgba(208,188,255,0.2)]";
-        } else if (tabName === 'discover' && btnDiscover) {
+        if (tabName === 'discover' && btnDiscover) {
             btnDiscover.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-secondary/20 text-secondary border border-secondary/40 shadow-[0_0_10px_rgba(76,215,246,0.2)]";
+        } else if (tabName === 'graph' && btnGraph) {
+            btnGraph.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-primary/20 text-primary border border-primary/40 shadow-[0_0_10px_rgba(208,188,255,0.2)]";
         } else if (tabName === 'trending' && btnTrending) {
             btnTrending.className = "px-4 py-1.5 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-tertiary/20 text-tertiary border border-tertiary/40 shadow-[0_0_10px_rgba(78,222,163,0.2)]";
         }
@@ -48,7 +48,7 @@ export function initNavbar(onViewChange, onSearchOpen) {
     if (btnGraph) btnGraph.addEventListener('click', () => updateActiveTab('graph'));
     if (btnDiscover) btnDiscover.addEventListener('click', () => updateActiveTab('discover'));
     if (btnTrending) btnTrending.addEventListener('click', () => updateActiveTab('trending'));
-    if (brandLogo) brandLogo.addEventListener('click', () => updateActiveTab('graph'));
+    if (brandLogo) brandLogo.addEventListener('click', () => updateActiveTab('discover'));
     if (btnOpenSearch) btnOpenSearch.addEventListener('click', onSearchOpen);
 
     // Update Pokédex & Node Counter

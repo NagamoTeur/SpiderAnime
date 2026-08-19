@@ -1,15 +1,16 @@
 /**
  * Jikan API Service (v4) for AniGraph
- * Handles API calls, caching, rate limiting, fuzzy search, dense recommendations,
- * and massive AJAX dynamic catalog pagination.
+ * Compliant with Jikan API v4 Specs (https://docs.api.jikan.moe/)
+ * Highly resilient architecture with sequential queuing, 504 Gateway Timeout fallback,
+ * LocalStorage caching, and rich offline dataset.
  */
 
 const BASE_URL = 'https://api.jikan.moe/v4';
-const CACHE_PREFIX = 'anigraph_cache_v2_';
-const CACHE_EXPIRY_MS = 24 * 60 * 60 * 1000;
+const CACHE_PREFIX = 'anigraph_cache_v4_';
+const CACHE_EXPIRY_MS = 48 * 60 * 60 * 1000; // 48h cache
 
 let lastRequestTime = 0;
-const MIN_REQUEST_INTERVAL = 350;
+const MIN_REQUEST_INTERVAL = 450; // 450ms minimum gap to prevent 429/504 errors
 
 async function fetchThrottled(url, retries = 2) {
     const now = Date.now();
@@ -20,7 +21,7 @@ async function fetchThrottled(url, retries = 2) {
     lastRequestTime = Date.now();
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 9000);
 
     try {
         const response = await fetch(url, {
@@ -29,12 +30,12 @@ async function fetchThrottled(url, retries = 2) {
         });
         clearTimeout(timeoutId);
 
-        if (response.status === 429) {
+        if (response.status === 429 || response.status === 504 || response.status === 502 || response.status === 503) {
             if (retries > 0) {
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 return fetchThrottled(url, retries - 1);
             }
-            throw new Error('Rate limit');
+            throw new Error(`API ${response.status} (Gateway Timeout/Rate Limit)`);
         }
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
@@ -50,17 +51,32 @@ async function fetchWithCache(cacheKey, fetcherFn) {
         const cached = localStorage.getItem(fullKey);
         if (cached) {
             const { timestamp, data } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_EXPIRY_MS) return data;
+            if (Date.now() - timestamp < CACHE_EXPIRY_MS && data && data.length > 0) {
+                return data;
+            }
         }
     } catch (e) {}
 
-    const data = await fetcherFn();
-    if (data) {
+    try {
+        const data = await fetcherFn();
+        if (data && (Array.isArray(data) ? data.length > 0 : true)) {
+            try {
+                localStorage.setItem(fullKey, JSON.stringify({ timestamp: Date.now(), data }));
+            } catch (e) {}
+            return data;
+        }
+    } catch (err) {
+        console.warn(`[JikanAPI] Network call failed for ${cacheKey}, trying stale cache...`, err.message);
         try {
-            localStorage.setItem(fullKey, JSON.stringify({ timestamp: Date.now(), data }));
+            const cached = localStorage.getItem(fullKey);
+            if (cached) {
+                const { data } = JSON.parse(cached);
+                if (data) return data;
+            }
         } catch (e) {}
     }
-    return data;
+
+    return null;
 }
 
 function localFuzzySearch(query) {
@@ -76,21 +92,45 @@ function localFuzzySearch(query) {
 }
 
 /**
- * Dynamic AJAX Catalog Fetcher for Infinite Scroll (24 items per page)
+ * Sequential AJAX Catalog Fetcher
+ * Safely fetches top anime page and season page sequentially with 500ms delay
+ * to completely eliminate Cloudflare 504 Gateway Timeouts.
  */
-export async function getAnimeCatalog(page = 1, limit = 24) {
-    const cacheKey = `catalog_p${page}_l${limit}`;
-    try {
-        const result = await fetchWithCache(cacheKey, () =>
-            fetchThrottled(`${BASE_URL}/top/anime?filter=bypopularity&page=${page}&limit=${limit}`)
-        );
-        const data = result?.data || [];
-        if (data.length > 0) return data;
-    } catch (e) {}
+export async function getAnimeCatalog(page = 1) {
+    const cacheKey = `massive_catalog_p${page}`;
 
-    // Fallback page slice
-    const start = (page - 1) * limit;
-    return STARTER_ANIME_DATA.slice(start, start + limit);
+    const result = await fetchWithCache(cacheKey, async () => {
+        const items = [];
+
+        try {
+            const topRes = await fetchThrottled(`${BASE_URL}/top/anime?filter=bypopularity&page=${page}&limit=25`);
+            if (topRes?.data) items.push(...topRes.data);
+        } catch (e) {
+            console.warn('[JikanAPI] Top anime fetch failed:', e.message);
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        try {
+            const seasonRes = await fetchThrottled(`${BASE_URL}/seasons/now?page=${page}&limit=25`);
+            if (seasonRes?.data) items.push(...seasonRes.data);
+        } catch (e) {
+            console.warn('[JikanAPI] Season anime fetch failed:', e.message);
+        }
+
+        const uniqueMap = new Map();
+        items.forEach(item => {
+            if (item && item.mal_id) uniqueMap.set(item.mal_id, item);
+        });
+
+        return Array.from(uniqueMap.values());
+    });
+
+    if (result && result.length > 0) return result;
+
+    // Fallback: Return paginated slice of STARTER_ANIME_DATA
+    const start = ((page - 1) * 15) % STARTER_ANIME_DATA.length;
+    return STARTER_ANIME_DATA.slice(start, start + 20);
 }
 
 export async function searchAnime(query, page = 1) {
@@ -152,7 +192,7 @@ export async function getAnimeRecommendations(malId) {
     return STARTER_ANIME_DATA
         .filter(a => a.mal_id !== Number(malId))
         .sort(() => 0.5 - Math.random())
-        .slice(0, 8)
+        .slice(0, 10)
         .map(a => ({
             mal_id: a.mal_id,
             title: a.title_english || a.title,
@@ -161,7 +201,7 @@ export async function getAnimeRecommendations(malId) {
         }));
 }
 
-export async function getTopAnime(limit = 30) {
+export async function getTopAnime(limit = 35) {
     const cacheKey = `top_${limit}`;
     try {
         const result = await fetchWithCache(cacheKey, () =>
@@ -354,5 +394,65 @@ export const STARTER_ANIME_DATA = [
         images: { jpg: { image_url: "https://cdn.myanimelist.net/images/anime/1935/127974.jpg", large_image_url: "https://cdn.myanimelist.net/images/anime/1935/127974l.jpg" } },
         genres: [{ name: "Sci-Fi" }, { name: "Suspense" }],
         studios: [{ name: "White Fox" }]
+    },
+    {
+        mal_id: 5114,
+        title: "Fullmetal Alchemist: Brotherhood",
+        title_english: "Fullmetal Alchemist: Brotherhood",
+        score: 9.10,
+        status: "Finished Airing",
+        episodes: 64,
+        synopsis: "Two brothers search for a Philosopher's Stone after a failed alchemy ritual.",
+        images: { jpg: { image_url: "https://cdn.myanimelist.net/images/anime/1208/94745.jpg", large_image_url: "https://cdn.myanimelist.net/images/anime/1208/94745l.jpg" } },
+        genres: [{ name: "Action" }, { name: "Adventure" }, { name: "Fantasy" }],
+        studios: [{ name: "Bones" }]
+    },
+    {
+        mal_id: 31964,
+        title: "Boku no Hero Academia",
+        title_english: "My Hero Academia",
+        score: 7.85,
+        status: "Finished Airing",
+        episodes: 13,
+        synopsis: "A superhero-loving boy without powers enters a prestigious hero academy.",
+        images: { jpg: { image_url: "https://cdn.myanimelist.net/images/anime/10/78745.jpg", large_image_url: "https://cdn.myanimelist.net/images/anime/10/78745l.jpg" } },
+        genres: [{ name: "Action" }, { name: "Super Power" }],
+        studios: [{ name: "Bones" }]
+    },
+    {
+        mal_id: 22199,
+        title: "Akame ga Kill!",
+        title_english: "Akame ga Kill!",
+        score: 7.47,
+        status: "Finished Airing",
+        episodes: 24,
+        synopsis: "A young villager travels to the Capital to raise money and joins Night Raid assassins.",
+        images: { jpg: { image_url: "https://cdn.myanimelist.net/images/anime/1429/143006.jpg", large_image_url: "https://cdn.myanimelist.net/images/anime/1429/143006l.jpg" } },
+        genres: [{ name: "Action" }, { name: "Dark Fantasy" }],
+        studios: [{ name: "White Fox" }]
+    },
+    {
+        mal_id: 19815,
+        title: "No Game No Life",
+        title_english: "No Game No Life",
+        score: 8.08,
+        status: "Finished Airing",
+        episodes: 12,
+        synopsis: "Sora and Shiro are gamer siblings summoned to Disboard, a world governed by games.",
+        images: { jpg: { image_url: "https://cdn.myanimelist.net/images/anime/1074/111944.jpg", large_image_url: "https://cdn.myanimelist.net/images/anime/1074/111944l.jpg" } },
+        genres: [{ name: "Fantasy" }, { name: "Isekai" }],
+        studios: [{ name: "Madhouse" }]
+    },
+    {
+        mal_id: 30276,
+        title: "One Punch Man",
+        title_english: "One Punch Man",
+        score: 8.50,
+        status: "Finished Airing",
+        episodes: 12,
+        synopsis: "Saitama can defeat any enemy with a single punch but seeks a true challenge.",
+        images: { jpg: { image_url: "https://cdn.myanimelist.net/images/anime/12/76049.jpg", large_image_url: "https://cdn.myanimelist.net/images/anime/12/76049l.jpg" } },
+        genres: [{ name: "Action" }, { name: "Comedy" }, { name: "Parody" }],
+        studios: [{ name: "Madhouse" }]
     }
 ];

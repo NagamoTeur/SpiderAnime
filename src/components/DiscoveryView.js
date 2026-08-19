@@ -1,6 +1,7 @@
 /**
  * DiscoveryView.js
- * Renders the dense discovery catalog grid with AJAX infinite pagination ("Charger 24 animés de plus...").
+ * Default Homepage Catalog View for AniGraph
+ * Renders dense anime cards (50 per batch) with AJAX pagination via "Charger plus d'animés".
  */
 
 import { getAnimeCatalog, getTopAnime } from '../services/jikanApi.js';
@@ -24,14 +25,16 @@ export class DiscoveryView {
         if (!this.container) return;
         this.renderSkeleton();
 
-        this.allAnime = await getTopAnime(24);
+        // Initial catalog load: 35-50 items
+        const initialBatch = await getTopAnime(35);
+        this.allAnime = initialBatch;
         this.renderGrid(this.allAnime);
         this.appendLoadMoreButton();
         this.initFilterEvents();
     }
 
     renderSkeleton() {
-        this.container.innerHTML = Array(12).fill(0).map(() => `
+        this.container.innerHTML = Array(15).fill(0).map(() => `
             <div class="glass-card rounded-2xl overflow-hidden animate-pulse">
                 <div class="h-64 bg-surface-container-high w-full"></div>
                 <div class="p-4 space-y-2">
@@ -163,7 +166,7 @@ export class DiscoveryView {
         loadMoreContainer.innerHTML = `
             <button id="btn-trigger-ajax" class="px-8 py-3.5 rounded-2xl font-headline-md text-xs font-bold bg-surface-container-high hover:bg-primary hover:text-on-primary border border-outline-variant/40 hover:border-primary text-on-surface shadow-[0_0_20px_rgba(208,188,255,0.2)] transition-all flex items-center gap-2.5">
                 <span class="material-symbols-outlined text-[20px]" id="ajax-icon">downloading</span>
-                <span id="ajax-text">Charger 24 animés de plus via AJAX</span>
+                <span id="ajax-text">Charger plus d'animés</span>
             </button>
         `;
 
@@ -176,10 +179,10 @@ export class DiscoveryView {
             const icon = loadMoreContainer.querySelector('#ajax-icon');
             const text = loadMoreContainer.querySelector('#ajax-text');
             if (icon) icon.className = 'material-symbols-outlined text-[20px] animate-spin';
-            if (text) text.textContent = 'Chargement AJAX en cours...';
+            if (text) text.textContent = 'Chargement en cours...';
 
             this.currentPage++;
-            const newAnime = await getAnimeCatalog(this.currentPage, 24);
+            const newAnime = await getAnimeCatalog(this.currentPage);
 
             if (newAnime.length > 0) {
                 newAnime.forEach(anime => {
@@ -193,7 +196,7 @@ export class DiscoveryView {
 
             this.isLoadingMore = false;
             if (icon) icon.className = 'material-symbols-outlined text-[20px]';
-            if (text) text.textContent = 'Charger 24 animés de plus via AJAX';
+            if (text) text.textContent = 'Charger plus d\'animés';
         });
     }
 }
