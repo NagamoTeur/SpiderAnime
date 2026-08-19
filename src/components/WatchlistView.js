@@ -1,8 +1,8 @@
 /**
  * WatchlistView.js
- * Dedicated Pokédex Watchlist & Anime Collection Manager for SpiderAnime.
- * Renders watch stats analytics (Total episodes, Hours spent), status filtering tabs,
- * quick +1 episode increments, personal rating stars, and instant Spider Web navigation.
+ * Decoupled Pokédex Watchlist & Anime Collection Manager for SpiderAnime.
+ * Features Like (+1 👍) / Dislike (-1 👎) interactive feedback for AI matching,
+ * watch analytics, +1 episode quick increment, and explicit "Tisser dans ma Toile" action.
  */
 
 import { graphStore } from '../services/graphStore.js';
@@ -31,11 +31,12 @@ export class WatchlistView {
     render() {
         if (!this.container) return;
         const snapshot = graphStore.getSnapshot();
-        const nodes = snapshot.nodes || [];
+        const watchlist = snapshot.watchlist || [];
         const stats = snapshot.stats;
 
-        const filteredNodes = nodes.filter(n => {
+        const filteredList = watchlist.filter(n => {
             if (this.activeFilter === 'all') return true;
+            if (this.activeFilter === 'liked') return n.userFeedback === 1;
             return (n.watchStatus || 'plan_to_watch') === this.activeFilter;
         });
 
@@ -49,23 +50,27 @@ export class WatchlistView {
                             <div class="w-8 h-8 rounded-xl bg-primary/20 text-primary flex items-center justify-center border border-primary/40">
                                 <span class="material-symbols-outlined text-[20px]">collections_bookmark</span>
                             </div>
-                            <h1 class="font-display-lg text-3xl md:text-4xl font-bold text-on-surface tracking-tight">Ma Watchlist Anime</h1>
+                            <h1 class="font-display-lg text-3xl md:text-4xl font-bold text-on-surface tracking-tight">Ma Collection Anime (Watchlist)</h1>
                         </div>
-                        <p class="text-on-surface-variant text-sm mt-1">Gérez votre collection d'animés, suivez votre avancement et complétez votre Pokédex.</p>
+                        <p class="text-on-surface-variant text-sm mt-1">Collection indépendante. Notez les animés (+1 / -1) pour affiner vos recommandations IA !</p>
                     </div>
 
-                    <!-- Watch Status Filter Tabs -->
+                    <!-- Watch Status & Like Filter Tabs -->
                     <div class="flex flex-wrap gap-2">
                         <button class="filter-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-label-mono font-medium transition-all ${
                             this.activeFilter === 'all' ? 'bg-primary text-on-primary font-bold shadow-[0_0_10px_rgba(208,188,255,0.3)]' : 'bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface'
-                        }" data-filter="all">Tous (${nodes.length})</button>
+                        }" data-filter="all">Tous (${watchlist.length})</button>
+
+                        <button class="filter-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-label-mono font-medium transition-all ${
+                            this.activeFilter === 'liked' ? 'bg-tertiary text-on-tertiary font-bold shadow' : 'bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface'
+                        }" data-filter="liked">👍 Aimés (${stats.totalLiked})</button>
 
                         <button class="filter-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-label-mono font-medium transition-all ${
                             this.activeFilter === 'watching' ? 'bg-secondary text-on-secondary font-bold shadow' : 'bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface'
                         }" data-filter="watching">🟢 En cours (${stats.watching})</button>
 
                         <button class="filter-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-label-mono font-medium transition-all ${
-                            this.activeFilter === 'completed' ? 'bg-tertiary text-on-tertiary font-bold shadow' : 'bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface'
+                            this.activeFilter === 'completed' ? 'bg-surface-tint text-on-primary font-bold shadow' : 'bg-surface-container border border-outline-variant/40 text-on-surface-variant hover:text-on-surface'
                         }" data-filter="completed">🟣 Terminés (${stats.completed})</button>
 
                         <button class="filter-tab-btn px-3.5 py-1.5 rounded-xl text-xs font-label-mono font-medium transition-all ${
@@ -74,12 +79,12 @@ export class WatchlistView {
                     </div>
                 </div>
 
-                <!-- Pokédex Watch Analytics Dashboard Cards -->
+                <!-- Pokédex Watch Analytics Dashboard -->
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div class="glass-card rounded-2xl p-4 border border-outline-variant/30 text-center space-y-1">
                         <span class="material-symbols-outlined text-primary text-[28px]">movie</span>
                         <span class="font-display-lg text-2xl font-bold text-on-surface block">${stats.total}</span>
-                        <span class="font-label-mono text-[11px] text-outline uppercase block">Animés au Pokédex</span>
+                        <span class="font-label-mono text-[11px] text-outline uppercase block">Animés en Collection</span>
                     </div>
 
                     <div class="glass-card rounded-2xl p-4 border border-outline-variant/30 text-center space-y-1">
@@ -89,24 +94,24 @@ export class WatchlistView {
                     </div>
 
                     <div class="glass-card rounded-2xl p-4 border border-outline-variant/30 text-center space-y-1">
-                        <span class="material-symbols-outlined text-tertiary text-[28px]">schedule</span>
-                        <span class="font-display-lg text-2xl font-bold text-tertiary block">${stats.totalHours}h</span>
-                        <span class="font-label-mono text-[11px] text-outline uppercase block">Temps d'Écran Estimé</span>
+                        <span class="material-symbols-outlined text-tertiary text-[28px]">thumb_up</span>
+                        <span class="font-display-lg text-2xl font-bold text-tertiary block">${stats.totalLiked}</span>
+                        <span class="font-label-mono text-[11px] text-outline uppercase block">Coup de Cœur (+1)</span>
                     </div>
 
                     <div class="glass-card rounded-2xl p-4 border border-outline-variant/30 text-center space-y-1">
-                        <span class="material-symbols-outlined text-surface-tint text-[28px]">verified</span>
-                        <span class="font-display-lg text-2xl font-bold text-surface-tint block">${stats.completed}</span>
-                        <span class="font-label-mono text-[11px] text-outline uppercase block">Séries Complétées</span>
+                        <span class="material-symbols-outlined text-surface-tint text-[28px]">schedule</span>
+                        <span class="font-display-lg text-2xl font-bold text-surface-tint block">${stats.totalHours}h</span>
+                        <span class="font-label-mono text-[11px] text-outline uppercase block">Temps d'Écran Estimé</span>
                     </div>
                 </div>
 
                 <!-- Watchlist Cards Grid -->
-                ${filteredNodes.length === 0 ? `
+                ${filteredList.length === 0 ? `
                     <div class="text-center py-20 bg-surface-container/40 rounded-3xl border border-outline-variant/20 space-y-3">
                         <span class="material-symbols-outlined text-5xl text-outline/40">bookmark_border</span>
                         <h3 class="font-headline-md text-lg text-on-surface font-semibold">Aucun animé dans cette catégorie</h3>
-                        <p class="font-body-md text-xs text-outline max-w-sm mx-auto">Parcourez l'onglet Découverte ou cherchez un animé pour l'ajouter à votre Watchlist.</p>
+                        <p class="font-body-md text-xs text-outline max-w-sm mx-auto">Ajoutez des animés depuis le catalogue Découverte pour construire votre collection.</p>
                         <button id="btn-go-discover" class="px-5 py-2.5 rounded-xl font-label-mono text-xs font-bold bg-primary text-on-primary hover:bg-primary-fixed transition-all inline-flex items-center gap-2 mt-2">
                             <span class="material-symbols-outlined text-[18px]">explore</span>
                             <span>Explorer le Catalogue</span>
@@ -114,7 +119,7 @@ export class WatchlistView {
                     </div>
                 ` : `
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        ${filteredNodes.map(node => this.renderWatchlistCardHTML(node)).join('')}
+                        ${filteredList.map(node => this.renderWatchlistCardHTML(node)).join('')}
                     </div>
                 `}
 
@@ -132,6 +137,8 @@ export class WatchlistView {
         const watched = node.watchedEpisodes || 0;
         const totalEp = node.totalEpisodes || 12;
         const progressPct = Math.min(100, Math.round((watched / (totalEp || 1)) * 100));
+
+        const feedback = node.userFeedback || 0;
 
         let statusBadge = '';
         if (status === 'watching') {
@@ -164,18 +171,41 @@ export class WatchlistView {
                     </div>
                 </div>
 
+                <!-- Feedback (+1 Like / -1 Dislike) Toolbar -->
+                <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-high/40 border border-outline-variant/20 text-xs">
+                    <span class="font-label-mono text-[11px] text-outline">Avis & Suggestions :</span>
+                    <div class="flex items-center gap-1.5">
+                        <button class="btn-feedback-like px-2 py-1 rounded-lg font-label-mono font-bold text-[11px] transition-all ${
+                            feedback === 1 
+                            ? 'bg-tertiary text-on-tertiary shadow-[0_0_10px_rgba(78,222,163,0.4)]' 
+                            : 'bg-surface-variant/80 text-outline hover:text-tertiary hover:bg-white/10'
+                        }" data-node-id="${node.id}">
+                            👍 +1 J'aime
+                        </button>
+
+                        <button class="btn-feedback-dislike px-2 py-1 rounded-lg font-label-mono font-bold text-[11px] transition-all ${
+                            feedback === -1 
+                            ? 'bg-error text-white shadow-[0_0_10px_rgba(255,77,77,0.4)]' 
+                            : 'bg-surface-variant/80 text-outline hover:text-error hover:bg-white/10'
+                        }" data-node-id="${node.id}">
+                            👎 -1 Pas pour moi
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Action Toolbar -->
-                <div class="flex items-center justify-between pt-2 border-t border-outline-variant/20 gap-2">
+                <div class="flex items-center justify-between pt-1 gap-2">
                     <div class="flex items-center gap-1">
                         <button class="btn-increment-ep px-2.5 py-1 rounded-lg text-xs font-label-mono font-bold bg-secondary/15 text-secondary border border-secondary/30 hover:bg-secondary hover:text-on-secondary transition-all flex items-center gap-1" data-node-id="${node.id}">
                             <span class="material-symbols-outlined text-[14px]">add</span>
-                            <span>+1 Épisode</span>
+                            <span>+1 Ep</span>
                         </button>
                     </div>
 
                     <div class="flex items-center gap-1.5">
-                        <button class="btn-view-canvas p-1.5 rounded-lg text-xs font-label-mono text-outline hover:text-primary hover:bg-white/10 transition-all" title="Voir sur la Toile d'Araignée" data-node-id="${node.id}">
-                            <span class="material-symbols-outlined text-[18px]">polyline</span>
+                        <button class="btn-weave-canvas px-2.5 py-1 rounded-lg text-xs font-label-mono font-semibold bg-primary/20 text-primary border border-primary/40 hover:bg-primary hover:text-on-primary transition-all flex items-center gap-1" data-node-id="${node.id}">
+                            <span class="material-symbols-outlined text-[14px]">polyline</span>
+                            <span>Tisser</span>
                         </button>
 
                         <button class="btn-delete-node p-1.5 rounded-lg text-xs font-label-mono text-outline hover:text-error hover:bg-error/10 transition-all" title="Supprimer de ma Watchlist" data-node-id="${node.id}">
@@ -188,7 +218,6 @@ export class WatchlistView {
     }
 
     bindEvents() {
-        // Status filter tabs
         this.container.querySelectorAll('.filter-tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.activeFilter = btn.dataset.filter;
@@ -196,12 +225,32 @@ export class WatchlistView {
             });
         });
 
-        // Go to discover button
         this.container.querySelector('#btn-go-discover')?.addEventListener('click', () => {
             switchTab('discover');
         });
 
-        // +1 Episode Quick Increment
+        // Feedback (+1 Like / -1 Dislike) Buttons
+        this.container.querySelectorAll('.btn-feedback-like').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const nodeId = btn.dataset.nodeId;
+                const node = graphStore.getNode(nodeId);
+                const currentFeedback = node?.userFeedback || 0;
+                graphStore.setUserFeedback(nodeId, currentFeedback === 1 ? 0 : 1);
+            });
+        });
+
+        this.container.querySelectorAll('.btn-feedback-dislike').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const nodeId = btn.dataset.nodeId;
+                const node = graphStore.getNode(nodeId);
+                const currentFeedback = node?.userFeedback || 0;
+                graphStore.setUserFeedback(nodeId, currentFeedback === -1 ? 0 : -1);
+            });
+        });
+
+        // +1 Episode Increment
         this.container.querySelectorAll('.btn-increment-ep').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -210,13 +259,16 @@ export class WatchlistView {
             });
         });
 
-        // View on canvas
-        this.container.querySelectorAll('.btn-view-canvas').forEach(btn => {
+        // Explicitly weave to Canvas Toile
+        this.container.querySelectorAll('.btn-weave-canvas').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const nodeId = btn.dataset.nodeId;
-                graphStore.selectNode(nodeId);
-                switchTab('graph');
+                const item = graphStore.getNode(nodeId);
+                if (item) {
+                    graphStore.addFavorite(item);
+                    switchTab('graph');
+                }
             });
         });
 
@@ -228,16 +280,15 @@ export class WatchlistView {
                 const node = graphStore.getNode(nodeId);
                 if (node) {
                     confirmModal.ask({
-                        title: 'Retirer de ma Watchlist ?',
-                        message: `Voulez-vous supprimer "${node.title}" de votre collection ?`,
+                        title: 'Retirer de ma Collection ?',
+                        message: `Voulez-vous supprimer "${node.title}" de votre Watchlist ?`,
                         posterUrl: node.image_url,
-                        onConfirm: () => graphStore.removeNode(nodeId)
+                        onConfirm: () => graphStore.removeFromWatchlist(nodeId)
                     });
                 }
             });
         });
 
-        // Click card to select node
         this.container.querySelectorAll('.watchlist-card').forEach(card => {
             card.addEventListener('click', () => {
                 const nodeId = card.dataset.id;

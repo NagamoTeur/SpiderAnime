@@ -1,19 +1,20 @@
 /**
  * Graph Store & State Manager for SpiderAnime
- * Manages nodes, spider-web links, recommendations, PER-USER persistence,
- * and comprehensive Anime Watchlist & Pokédex Analytics.
+ * Decouples Spider Web Canvas (Toile) from User Watchlist (Collection),
+ * and implements User Feedback (+1 Like / -1 Dislike) for personalized AI recommendations.
  */
 
 import { getAnimeRecommendations, STARTER_ANIME_DATA } from './aniListApi.js';
 import { authService } from './authService.js';
 import { RecommendationEngine } from './recommendationEngine.js';
 
-const STORAGE_PREFIX = 'spideranime_watch_data_v1_';
+const STORAGE_PREFIX = 'spideranime_decoupled_data_v2_';
 
 class GraphStore {
     constructor() {
         this.nodes = [];
         this.links = [];
+        this.watchlist = [];
         this.selectedNodeId = null;
         this.listeners = new Set();
         this.initialized = false;
@@ -41,11 +42,29 @@ class GraphStore {
         return {
             nodes: this.nodes,
             links: this.links,
+            watchlist: this.watchlist,
             selectedNodeId: this.selectedNodeId,
             selectedNode: this.getNode(this.selectedNodeId),
             currentUser: authService.getCurrentUser(),
-            stats: this.getPokedexStats()
+            stats: this.getPokedexStats(),
+            userPreferences: this.getUserPreferences()
         };
+    }
+
+    getUserPreferences() {
+        const likedGenres = new Set();
+        const dislikedGenres = new Set();
+
+        this.watchlist.forEach(item => {
+            const genres = (item.genres || []).map(g => (typeof g === 'object' ? g.name : g).toLowerCase());
+            if (item.userFeedback === 1) {
+                genres.forEach(g => likedGenres.add(g));
+            } else if (item.userFeedback === -1) {
+                genres.forEach(g => dislikedGenres.add(g));
+            }
+        });
+
+        return { likedGenres, dislikedGenres };
     }
 
     getPokedexStats() {
@@ -54,8 +73,10 @@ class GraphStore {
         let planToWatch = 0;
         let dropped = 0;
         let totalWatchedEpisodes = 0;
+        let totalLiked = 0;
+        let totalDisliked = 0;
 
-        this.nodes.forEach(n => {
+        this.watchlist.forEach(n => {
             const status = n.watchStatus || 'plan_to_watch';
             const watched = n.watchedEpisodes || 0;
             totalWatchedEpisodes += watched;
@@ -64,6 +85,9 @@ class GraphStore {
             else if (status === 'watching') watching++;
             else if (status === 'plan_to_watch') planToWatch++;
             else if (status === 'dropped') dropped++;
+
+            if (n.userFeedback === 1) totalLiked++;
+            else if (n.userFeedback === -1) totalDisliked++;
         });
 
         const totalHours = Math.round((totalWatchedEpisodes * 24) / 60);
@@ -73,14 +97,16 @@ class GraphStore {
             watching,
             planToWatch,
             dropped,
-            total: this.nodes.length,
+            total: this.watchlist.length,
             totalWatchedEpisodes,
-            totalHours
+            totalHours,
+            totalLiked,
+            totalDisliked
         };
     }
 
     getNode(nodeId) {
-        return this.nodes.find(n => n.id === nodeId) || null;
+        return this.nodes.find(n => n.id === nodeId) || this.watchlist.find(w => w.id === nodeId) || null;
     }
 
     async init() {
@@ -99,10 +125,11 @@ class GraphStore {
         try {
             const saved = localStorage.getItem(key);
             if (saved) {
-                const { nodes, links } = JSON.parse(saved);
-                if (nodes && nodes.length > 0) {
-                    this.nodes = nodes;
+                const { nodes, links, watchlist } = JSON.parse(saved);
+                if (nodes || watchlist) {
+                    this.nodes = nodes || [];
                     this.links = links || [];
+                    this.watchlist = watchlist || [];
                     this.notify();
                     return;
                 }
@@ -117,23 +144,26 @@ class GraphStore {
     async loadStarterGraph() {
         this.nodes = [];
         this.links = [];
+        this.watchlist = [];
 
         const dn = STARTER_ANIME_DATA[0];
         const aot = STARTER_ANIME_DATA[1];
         const oshi = STARTER_ANIME_DATA[2];
 
-        this.addNode({
+        // Seed initial Watchlist (Independent of canvas)
+        this.setWatchlistStatus(aot, 'completed', 25, 1); // Liked (+1)
+        this.setWatchlistStatus(dn, 'completed', 37, 1); // Liked (+1)
+        this.setWatchlistStatus(oshi, 'watching', 6, 0); // Neutral (0)
+
+        // Seed initial Canvas Toile
+        const aotNode = this.addNode({
             mal_id: aot.id,
             id: `media_${aot.id}`,
             title: aot.title_english || aot.title,
             image_url: aot.image_url,
             score: aot.score,
-            userScore: 9,
             isFavorite: true,
             isRoot: true,
-            watchStatus: 'completed',
-            watchedEpisodes: 25,
-            totalEpisodes: 25,
             genres: aot.genres.map(g => g.name || g),
             relevancePct: 100,
             anamorphScale: 1.2,
@@ -141,17 +171,13 @@ class GraphStore {
             y: 0
         });
 
-        this.addNode({
+        const dnNode = this.addNode({
             mal_id: dn.id,
             id: `media_${dn.id}`,
             title: dn.title_english || dn.title,
             image_url: dn.image_url,
             score: dn.score,
-            userScore: 10,
             isFavorite: true,
-            watchStatus: 'completed',
-            watchedEpisodes: 37,
-            totalEpisodes: 37,
             genres: dn.genres.map(g => g.name || g),
             relevancePct: 90,
             anamorphScale: 1.1,
@@ -159,30 +185,7 @@ class GraphStore {
             y: -110
         });
 
-        this.addNode({
-            mal_id: oshi.id,
-            id: `media_${oshi.id}`,
-            title: oshi.title_english || oshi.title,
-            image_url: oshi.image_url,
-            score: oshi.score,
-            userScore: 8,
-            isFavorite: false,
-            watchStatus: 'watching',
-            watchedEpisodes: 6,
-            totalEpisodes: 11,
-            genres: oshi.genres.map(g => g.name || g),
-            relevancePct: 88,
-            anamorphScale: 1.05,
-            x: -190,
-            y: 130
-        });
-
-        const aotId = `media_${aot.id}`;
-        const dnId = `media_${dn.id}`;
-        const oshiId = `media_${oshi.id}`;
-
-        this.addLink(aotId, dnId, 'recommendation', 90);
-        this.addLink(aotId, oshiId, 'recommendation', 88);
+        this.addLink(aotNode.id, dnNode.id, 'recommendation', 90);
 
         this.save();
         this.notify();
@@ -199,13 +202,9 @@ class GraphStore {
                 title: anime.title || anime.title_english,
                 image_url: anime.image_url || anime.images?.jpg?.image_url || '',
                 score: anime.score || 8.0,
-                userScore: anime.userScore || 0,
                 isFavorite: !!anime.isFavorite,
                 isRoot: !!anime.isRoot,
                 expanded: false,
-                watchStatus: anime.watchStatus || 'plan_to_watch',
-                watchedEpisodes: anime.watchedEpisodes || 0,
-                totalEpisodes: anime.totalEpisodes || anime.episodes || 12,
                 genres: anime.genres || [],
                 relevancePct: anime.relevancePct || 85,
                 anamorphScale: anime.anamorphScale || 1.0,
@@ -217,8 +216,6 @@ class GraphStore {
         } else {
             if (anime.isFavorite !== undefined) existing.isFavorite = anime.isFavorite;
             if (anime.isRoot !== undefined) existing.isRoot = anime.isRoot;
-            if (anime.watchStatus !== undefined) existing.watchStatus = anime.watchStatus;
-            if (anime.watchedEpisodes !== undefined) existing.watchedEpisodes = anime.watchedEpisodes;
             if (anime.relevancePct !== undefined) existing.relevancePct = anime.relevancePct;
         }
 
@@ -241,7 +238,7 @@ class GraphStore {
 
             let relMetrics = { scorePct: relevancePct, distance: 180, scale: 1.0, pulseSpeed: 0.015 };
             if (sourceNode && targetNode) {
-                relMetrics = RecommendationEngine.computeRelevance(sourceNode, targetNode);
+                relMetrics = RecommendationEngine.computeRelevance(sourceNode, targetNode, 10, this.getUserPreferences());
             }
 
             this.links.push({
@@ -267,10 +264,12 @@ class GraphStore {
             ...animeData,
             isFavorite: true,
             isRoot: true,
-            watchStatus: 'watching',
             relevancePct: 100,
             anamorphScale: 1.2
         });
+
+        // Also add to Watchlist as Watching if not present
+        this.setWatchlistStatus(animeData, 'watching');
 
         this.selectNode(node.id);
         this.save();
@@ -279,21 +278,92 @@ class GraphStore {
         await this.expandNode(node.id);
     }
 
-    setWatchStatus(animeData, status) {
+    /**
+     * Independent Watchlist Item Manager (Decoupled from Canvas)
+     */
+    setWatchlistStatus(animeData, status = 'plan_to_watch', watchedEp = 0, feedback = 0) {
+        const id = animeData.id || `media_${animeData.mal_id || animeData.id}`;
+        let item = this.watchlist.find(w => w.id === id);
+
         const totalEp = animeData.episodes || animeData.totalEpisodes || 12;
-        let watched = animeData.watchedEpisodes || 0;
+        let watched = watchedEp || animeData.watchedEpisodes || 0;
         if (status === 'completed') watched = totalEp;
 
-        const node = this.addNode({
-            ...animeData,
-            watchStatus: status,
-            watchedEpisodes: watched,
-            totalEpisodes: totalEp
-        });
+        if (!item) {
+            item = {
+                id,
+                mal_id: animeData.mal_id || animeData.id,
+                title: animeData.title || animeData.title_english,
+                image_url: animeData.image_url || animeData.images?.jpg?.image_url || '',
+                score: animeData.score || 8.0,
+                watchStatus: status,
+                watchedEpisodes: watched,
+                totalEpisodes: totalEp,
+                userFeedback: feedback, // 1 = Like (+1), -1 = Dislike (-1), 0 = Neutral
+                genres: animeData.genres || []
+            };
+            this.watchlist.push(item);
+        } else {
+            item.watchStatus = status;
+            item.watchedEpisodes = watched;
+            if (feedback !== undefined) item.userFeedback = feedback;
+        }
 
         this.save();
         this.notify();
-        return node;
+        return item;
+    }
+
+    /**
+     * Set User Feedback (+1 Like / -1 Dislike) for personalized AI matching
+     */
+    setUserFeedback(animeId, feedbackValue) {
+        let item = this.watchlist.find(w => w.id === animeId);
+
+        if (!item) {
+            const canvasNode = this.getNode(animeId);
+            if (canvasNode) {
+                item = this.setWatchlistStatus(canvasNode, 'plan_to_watch', 0, feedbackValue);
+            }
+        } else {
+            item.userFeedback = feedbackValue;
+        }
+
+        this.save();
+        this.notify();
+    }
+
+    updateWatchProgress(nodeId, status, watchedEp) {
+        let item = this.watchlist.find(w => w.id === nodeId);
+        if (!item) {
+            const node = this.getNode(nodeId);
+            if (node) item = this.setWatchlistStatus(node, status, watchedEp);
+        } else {
+            if (status) item.watchStatus = status;
+            if (watchedEp !== undefined) {
+                item.watchedEpisodes = Math.max(0, Math.min(item.totalEpisodes || 999, watchedEp));
+                if (item.totalEpisodes && item.watchedEpisodes >= item.totalEpisodes) {
+                    item.watchStatus = 'completed';
+                }
+            }
+        }
+
+        this.save();
+        this.notify();
+    }
+
+    incrementEpisode(nodeId) {
+        let item = this.watchlist.find(w => w.id === nodeId);
+        if (item) {
+            const newWatched = (item.watchedEpisodes || 0) + 1;
+            this.updateWatchProgress(nodeId, item.watchStatus, newWatched);
+        }
+    }
+
+    removeFromWatchlist(nodeId) {
+        this.watchlist = this.watchlist.filter(w => w.id !== nodeId);
+        this.save();
+        this.notify();
     }
 
     async expandNode(nodeId) {
@@ -307,9 +377,11 @@ class GraphStore {
             const count = Math.min(recs.length, 10);
             const angleStep = (Math.PI * 2) / count;
 
+            const userPrefs = this.getUserPreferences();
+
             recs.slice(0, 10).forEach((rec, idx) => {
                 const dummyTarget = { title: rec.title, score: 8.0, genres: node.genres };
-                const rel = RecommendationEngine.computeRelevance(node, dummyTarget, rec.votes);
+                const rel = RecommendationEngine.computeRelevance(node, dummyTarget, rec.votes, userPrefs);
 
                 const angle = idx * angleStep + (Math.random() * 0.15);
                 const radius = rel.distance;
@@ -321,7 +393,6 @@ class GraphStore {
                     image_url: rec.image_url,
                     score: 7.8 + (Math.random() * 1.5),
                     isFavorite: false,
-                    watchStatus: 'plan_to_watch',
                     relevancePct: rel.scorePct,
                     anamorphScale: rel.scale,
                     pulseSpeed: rel.pulseSpeed,
@@ -339,31 +410,6 @@ class GraphStore {
         }
     }
 
-    updateWatchProgress(nodeId, status, watchedEp, userScore) {
-        const node = this.getNode(nodeId);
-        if (!node) return;
-
-        if (status) node.watchStatus = status;
-        if (userScore !== undefined) node.userScore = userScore;
-        if (watchedEp !== undefined) {
-            node.watchedEpisodes = Math.max(0, Math.min(node.totalEpisodes || 999, watchedEp));
-            if (node.totalEpisodes && node.watchedEpisodes >= node.totalEpisodes) {
-                node.watchStatus = 'completed';
-            }
-        }
-
-        this.save();
-        this.notify();
-    }
-
-    incrementEpisode(nodeId) {
-        const node = this.getNode(nodeId);
-        if (!node) return;
-
-        const newWatched = (node.watchedEpisodes || 0) + 1;
-        this.updateWatchProgress(nodeId, node.watchStatus, newWatched);
-    }
-
     toggleFavorite(nodeId) {
         const node = this.getNode(nodeId);
         if (node) {
@@ -374,6 +420,17 @@ class GraphStore {
             this.save();
             this.notify();
         }
+    }
+
+    /**
+     * Clears only the Spider Web Canvas Toile (Does NOT affect Watchlist!)
+     */
+    clearGraph() {
+        this.nodes = [];
+        this.links = [];
+        this.selectedNodeId = null;
+        this.save();
+        this.notify();
     }
 
     removeNode(nodeId) {
@@ -394,14 +451,6 @@ class GraphStore {
         this.notify();
     }
 
-    clearGraph() {
-        this.nodes = [];
-        this.links = [];
-        this.selectedNodeId = null;
-        localStorage.setItem(this.getStorageKey(), JSON.stringify({ nodes: [], links: [] }));
-        this.notify();
-    }
-
     save() {
         try {
             const serializableNodes = this.nodes.map(n => ({
@@ -410,13 +459,9 @@ class GraphStore {
                 title: n.title,
                 image_url: n.image_url,
                 score: n.score,
-                userScore: n.userScore,
                 isFavorite: n.isFavorite,
                 isRoot: n.isRoot,
                 expanded: n.expanded,
-                watchStatus: n.watchStatus,
-                watchedEpisodes: n.watchedEpisodes,
-                totalEpisodes: n.totalEpisodes,
                 genres: n.genres,
                 relevancePct: n.relevancePct,
                 anamorphScale: n.anamorphScale,
@@ -435,9 +480,23 @@ class GraphStore {
                 pulseSpeed: l.pulseSpeed
             }));
 
+            const serializableWatchlist = this.watchlist.map(w => ({
+                id: w.id,
+                mal_id: w.mal_id,
+                title: w.title,
+                image_url: w.image_url,
+                score: w.score,
+                watchStatus: w.watchStatus,
+                watchedEpisodes: w.watchedEpisodes,
+                totalEpisodes: w.totalEpisodes,
+                userFeedback: w.userFeedback,
+                genres: w.genres
+            }));
+
             localStorage.setItem(this.getStorageKey(), JSON.stringify({
                 nodes: serializableNodes,
-                links: serializableLinks
+                links: serializableLinks,
+                watchlist: serializableWatchlist
             }));
         } catch (e) {
             console.warn('[GraphStore] Save failed:', e);

@@ -1,6 +1,7 @@
 /**
- * AnimeDetailSidebar.js (Branch: feature/anilist-api)
- * Glassmorphic slide-out sidebar powered by AniList GraphQL API with Pokédex Watch Tracker.
+ * AnimeDetailSidebar.js
+ * Glassmorphic slide-out sidebar powered by AniList GraphQL API with
+ * Like (+1) / Dislike (-1) feedback and Pokédex Watch Tracker.
  */
 
 import { graphStore } from '../services/graphStore.js';
@@ -92,6 +93,7 @@ export class AnimeDetailSidebar {
 
         const watchStatus = node.watchStatus || 'plan_to_watch';
         const watchedEp = node.watchedEpisodes || 0;
+        const feedback = node.userFeedback || 0;
         const progressPct = Math.min(100, Math.round((watchedEp / (totalEp || 1)) * 100));
 
         this.content.innerHTML = `
@@ -110,11 +112,30 @@ export class AnimeDetailSidebar {
                 </div>
             </div>
 
+            <!-- Like (+1) / Dislike (-1) AI Personalization Toolbar -->
+            <div class="p-3.5 rounded-2xl bg-surface-container/70 border border-outline-variant/40 flex items-center justify-between gap-2">
+                <span class="font-label-mono text-xs text-on-surface font-semibold">Avis personnel (IA) :</span>
+                <div class="flex items-center gap-2">
+                    <button id="btn-like-ai" class="px-3 py-1.5 rounded-xl font-label-mono font-bold text-xs transition-all ${
+                        feedback === 1 
+                        ? 'bg-tertiary text-on-tertiary shadow-[0_0_10px_rgba(78,222,163,0.4)]' 
+                        : 'bg-surface-variant/80 text-outline hover:text-tertiary hover:bg-white/10'
+                    }">👍 +1 J'aime</button>
+
+                    <button id="btn-dislike-ai" class="px-3 py-1.5 rounded-xl font-label-mono font-bold text-xs transition-all ${
+                        feedback === -1 
+                        ? 'bg-error text-white shadow-[0_0_10px_rgba(255,77,77,0.4)]' 
+                        : 'bg-surface-variant/80 text-outline hover:text-error hover:bg-white/10'
+                    }">👎 -1 Pas pour moi</button>
+                </div>
+            </div>
+
+            <!-- Pokédex Watch Tracker -->
             <div class="p-4 rounded-2xl bg-surface-container/70 border border-outline-variant/40 space-y-3">
                 <div class="flex items-center justify-between">
                     <span class="font-label-mono text-xs text-secondary font-semibold uppercase flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-[16px]">bookmark_added</span>
-                        <span>Pokédex Status</span>
+                        <span>Pokédex Watchlist</span>
                     </span>
                     <span class="font-label-mono text-[11px] text-outline">${watchedEp} / ${totalEp} ép</span>
                 </div>
@@ -147,6 +168,7 @@ export class AnimeDetailSidebar {
                 </div>
             </div>
 
+            <!-- Action Buttons -->
             <div class="flex gap-2">
                 <button id="btn-toggle-fav" class="flex-1 py-2.5 rounded-xl font-headline-md text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                     isFavorite 
@@ -154,7 +176,7 @@ export class AnimeDetailSidebar {
                     : 'bg-surface-container border border-outline-variant/40 text-on-surface hover:border-primary/50'
                 }">
                     <span class="material-symbols-outlined text-[18px]">${isFavorite ? 'favorite' : 'favorite_border'}</span>
-                    <span>${isFavorite ? 'Favori' : 'Mettre en Favori'}</span>
+                    <span>${isFavorite ? 'Sur la Toile' : 'Ajouter à la Toile'}</span>
                 </button>
 
                 <button id="btn-expand-web" class="flex-1 py-2.5 rounded-xl font-headline-md text-xs font-semibold bg-secondary text-on-secondary hover:bg-secondary-fixed shadow-[0_0_15px_rgba(76,215,246,0.3)] flex items-center justify-center gap-2 transition-all">
@@ -166,7 +188,7 @@ export class AnimeDetailSidebar {
             <div>
                 <button id="btn-remove-node" class="w-full py-2.5 rounded-xl font-headline-md text-xs font-semibold bg-error/10 text-error border border-error/30 hover:bg-error/20 transition-all flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined text-[18px]">delete</span>
-                    <span>Supprimer ce nœud de la toile</span>
+                    <span>Supprimer de la toile</span>
                 </button>
             </div>
 
@@ -219,7 +241,7 @@ export class AnimeDetailSidebar {
 
             <div>
                 <h4 class="font-label-mono text-xs text-secondary uppercase mb-3 flex items-center justify-between">
-                    <span>Animés Suggérés (AniList Toile)</span>
+                    <span>Animés Suggérés (Toile)</span>
                     <span class="text-[10px] text-outline">${recommendations.length} filons</span>
                 </h4>
                 <div class="space-y-2">
@@ -239,6 +261,16 @@ export class AnimeDetailSidebar {
             </div>
         `;
 
+        // Like (+1) / Dislike (-1) Buttons
+        this.content.querySelector('#btn-like-ai')?.addEventListener('click', () => {
+            graphStore.setUserFeedback(node.id, feedback === 1 ? 0 : 1);
+        });
+
+        this.content.querySelector('#btn-dislike-ai')?.addEventListener('click', () => {
+            graphStore.setUserFeedback(node.id, feedback === -1 ? 0 : -1);
+        });
+
+        // Watch Status
         this.content.querySelectorAll('.status-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const newStatus = btn.dataset.status;
